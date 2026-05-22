@@ -11,6 +11,12 @@
 interval: 30m         # default cadence — overridden per-monitor when needed
 slow_latency: 8s
 
+# Public-facing origin — used by the SSR meta layer to build
+# og:url, og:image, canonical, hreflang. Without this it falls back
+# to upstream's https://relaypulse.top and social previews show the
+# wrong site.
+public_base_url: https://status.sakrylle.com
+
 storage:
   type: sqlite
   sqlite:
