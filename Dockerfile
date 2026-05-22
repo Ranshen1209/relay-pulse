@@ -65,7 +65,7 @@ COPY --from=frontend /build/dist/. ./internal/api/frontend/dist/
 
 # 验证关键前端产物存在
 RUN test -f ./internal/api/frontend/dist/index.html && \
-    test -f ./internal/api/frontend/dist/favicon.svg && \
+    test -f ./internal/api/frontend/dist/logo.png && \
     echo "Frontend assets verified"
 
 # 获取构建时间和版本信息
