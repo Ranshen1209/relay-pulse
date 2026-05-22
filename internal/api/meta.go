@@ -143,33 +143,33 @@ func getMetaContent(langCode string, slug string, providerName string, isProvide
 		escapedName := html.EscapeString(providerName)
 		switch langCode {
 		case "zh-CN":
-			title = fmt.Sprintf("%s 服务可用性监测 - RelayPulse", escapedName)
+			title = fmt.Sprintf("%s 服务可用性监测 - Sakrylle Status", escapedName)
 			description = fmt.Sprintf("实时监测 %s 的 API 可用性、延迟和服务质量，查看历史稳定性数据和赞助链路状态。", escapedName)
 		case "en-US":
-			title = fmt.Sprintf("%s Service Availability Monitoring - RelayPulse", escapedName)
+			title = fmt.Sprintf("%s Service Availability Monitoring - Sakrylle Status", escapedName)
 			description = fmt.Sprintf("Monitor %s API availability, latency, and service quality in real time. View historical stability data and sponsored route status.", escapedName)
 		case "ru-RU":
-			title = fmt.Sprintf("Мониторинг доступности сервиса %s - RelayPulse", escapedName)
+			title = fmt.Sprintf("Мониторинг доступности сервиса %s - Sakrylle Status", escapedName)
 			description = fmt.Sprintf("Мониторинг доступности API %s, задержки и качества обслуживания в реальном времени.", escapedName)
 		case "ja-JP":
-			title = fmt.Sprintf("%s サービス可用性監視 - RelayPulse", escapedName)
+			title = fmt.Sprintf("%s サービス可用性監視 - Sakrylle Status", escapedName)
 			description = fmt.Sprintf("%s の API 可用性、レイテンシ、サービス品質をリアルタイムで監視します。", escapedName)
 		}
 	} else {
 		// 首页
 		switch langCode {
 		case "zh-CN":
-			title = "RelayPulse - 实时监测API中转服务可用性矩阵"
-			description = "RelayPulse - 实时监测全球 LLM 中转服务的可用性、延迟与赞助链路，帮助开发者快速评估服务商质量，发现最稳定的 API 提供商。支持 Claude、GPT 等主流模型的连通性监测。"
+			title = "Sakrylle Status - 实时监测API中转服务可用性矩阵"
+			description = "Sakrylle Status - 实时监测全球 LLM 中转服务的可用性、延迟与赞助链路，帮助开发者快速评估服务商质量，发现最稳定的 API 提供商。支持 Claude、GPT 等主流模型的连通性监测。"
 		case "en-US":
-			title = "RelayPulse - Real-time availability matrix for API relay services"
-			description = "RelayPulse - Real-time monitoring of LLM relay services worldwide for availability, latency, and sponsored routes, helping developers quickly evaluate provider quality and discover the most stable API providers. Supports connectivity checks for mainstream models such as Claude and GPT."
+			title = "Sakrylle Status - Real-time availability matrix for API relay services"
+			description = "Sakrylle Status - Real-time monitoring of LLM relay services worldwide for availability, latency, and sponsored routes, helping developers quickly evaluate provider quality and discover the most stable API providers. Supports connectivity checks for mainstream models such as Claude and GPT."
 		case "ru-RU":
-			title = "RelayPulse - Матрица мониторинга доступности API-ретрансляционных сервисов в реальном времени"
-			description = "RelayPulse - Мониторинг в реальном времени доступности, задержки и спонсорских маршрутов глобальных LLM-ретрансляционных сервисов, помогающий разработчикам быстро оценивать качество провайдеров и находить самых стабильных API-поставщиков. Поддерживается проверка соединения для популярных моделей, таких как Claude и GPT."
+			title = "Sakrylle Status - Матрица мониторинга доступности API-ретрансляционных сервисов в реальном времени"
+			description = "Sakrylle Status - Мониторинг в реальном времени доступности, задержки и спонсорских маршрутов глобальных LLM-ретрансляционных сервисов, помогающий разработчикам быстро оценивать качество провайдеров и находить самых стабильных API-поставщиков. Поддерживается проверка соединения для популярных моделей, таких как Claude и GPT."
 		case "ja-JP":
-			title = "RelayPulse - API中継サービスの可用性マトリクスをリアルタイム監視"
-			description = "RelayPulse - 世界中のLLM中継サービスの可用性・レイテンシ・スポンサー経路をリアルタイムで監視。開発者がプロバイダの品質を素早く評価し、最も安定したAPIプロバイダを見つけられるよう支援します。Claude や GPT など主要モデルの接続性チェックに対応。"
+			title = "Sakrylle Status - API中継サービスの可用性マトリクスをリアルタイム監視"
+			description = "Sakrylle Status - 世界中のLLM中継サービスの可用性・レイテンシ・スポンサー経路をリアルタイムで監視。開発者がプロバイダの品質を素早く評価し、最も安定したAPIプロバイダを見つけられるよう支援します。Claude や GPT など主要モデルの接続性チェックに対応。"
 		}
 	}
 
@@ -291,7 +291,7 @@ func generatePageMeta(meta MetaData, baseURL string) PageMeta {
 		jsonLDData := map[string]interface{}{
 			"@context":    "https://schema.org",
 			"@type":       "WebSite",
-			"name":        "RelayPulse",
+			"name":        "Sakrylle Status",
 			"url":         baseURL,
 			"description": meta.Description,
 			"inLanguage":  []string{"zh-CN", "en-US", "ru-RU", "ja-JP"},
@@ -400,19 +400,19 @@ func inject404Meta(indexHTML string, langCode string) string {
 	var title, description string
 	switch langCode {
 	case "zh-CN":
-		title = "页面未找到 - RelayPulse"
+		title = "页面未找到 - Sakrylle Status"
 		description = "您访问的服务商页面不存在"
 	case "en-US":
-		title = "Page Not Found - RelayPulse"
+		title = "Page Not Found - Sakrylle Status"
 		description = "The provider page you are looking for does not exist"
 	case "ru-RU":
-		title = "Страница не найдена - RelayPulse"
+		title = "Страница не найдена - Sakrylle Status"
 		description = "Страница провайдера, которую вы ищете, не существует"
 	case "ja-JP":
-		title = "ページが見つかりません - RelayPulse"
+		title = "ページが見つかりません - Sakrylle Status"
 		description = "お探しのプロバイダーページは存在しません"
 	default:
-		title = "Page Not Found - RelayPulse"
+		title = "Page Not Found - Sakrylle Status"
 		description = "The provider page you are looking for does not exist"
 	}
 
