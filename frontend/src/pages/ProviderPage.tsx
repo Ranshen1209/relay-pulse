@@ -11,7 +11,6 @@ import { Controls } from '../components/Controls';
 import { StatusTable } from '../components/StatusTable';
 import { StatusCard } from '../components/StatusCard';
 import { Tooltip } from '../components/Tooltip';
-import { Footer } from '../components/Footer';
 import { EmptyFavorites } from '../components/EmptyFavorites';
 import { createMediaQueryEffect } from '../utils/mediaQuery';
 import { canonicalize } from '../utils/monitorDataProcessor';
@@ -501,8 +500,6 @@ export default function ProviderPage() {
           )}
         </main>
 
-        {/* 完整模式：显示 Footer */}
-        {!isEmbedMode && <Footer />}
         </div>
       </div>
     </>

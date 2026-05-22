@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckCircle, AlertTriangle, Filter } from 'lucide-react';
+import { CheckCircle, AlertTriangle, Filter, Github } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -91,8 +91,8 @@ export function Header({ stats, onFilterClick, onRefresh, loading, refreshCooldo
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 lg:gap-3">
-            <div className="p-1.5 lg:p-2 bg-accent/10 rounded-lg border border-accent/20 flex-shrink-0 animate-heartbeat">
-              <img src="/logo.png" alt="Sakrylle" className="w-5 h-5 lg:w-6 lg:h-6 object-contain" />
+            <div className="flex-shrink-0">
+              <img src="/logo.png" alt="Sakrylle" className="w-9 h-9 lg:w-11 lg:h-11 object-contain animate-heartbeat" />
             </div>
             <div>
               <h1 className="text-2xl lg:text-3xl font-bold text-gradient-hero">
@@ -159,6 +159,18 @@ export function Header({ stats, onFilterClick, onRefresh, loading, refreshCooldo
 
           {/* 主题切换器 */}
           <ThemeSwitcher />
+
+          {/* GitHub 链接 */}
+          <a
+            href="https://github.com/Ranshen1209/relay-pulse"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-2 rounded-lg bg-elevated/50 hover:bg-muted/50 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:outline-none"
+            aria-label="GitHub"
+            title="GitHub"
+          >
+            <Github size={14} />
+          </a>
 
           {/* 统计卡片 - 极简模式（最右侧） */}
           <div className="flex gap-0.5 ml-0.5 flex-shrink-0">
@@ -227,6 +239,18 @@ export function Header({ stats, onFilterClick, onRefresh, loading, refreshCooldo
 
           {/* 主题切换器 */}
           <ThemeSwitcher />
+
+          {/* GitHub 链接 */}
+          <a
+            href="https://github.com/Ranshen1209/relay-pulse"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-2 rounded-lg bg-elevated/50 hover:bg-muted/50 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:outline-none"
+            aria-label="GitHub"
+            title="GitHub"
+          >
+            <Github size={16} />
+          </a>
 
           {/* 统计卡片 - 紧凑单行 */}
           <div className="flex gap-2">

@@ -8,7 +8,6 @@ import { Controls } from './components/Controls';
 import { StatusTable } from './components/StatusTable';
 import { StatusCard } from './components/StatusCard';
 import { Tooltip } from './components/Tooltip';
-import { Footer } from './components/Footer';
 import { EmptyFavorites } from './components/EmptyFavorites';
 import { AnnouncementsBanner } from './components/AnnouncementsBanner';
 import { useMonitorData } from './hooks/useMonitorData';
@@ -573,7 +572,7 @@ function App() {
 
         <div className={isScreenshotMode
           ? "relative z-10 w-[1200px] mx-auto px-4 py-4"
-          : "relative z-10 max-w-7xl mx-auto px-4 py-4 sm:py-6 sm:px-6 lg:px-8"
+          : "relative z-10 max-w-7xl mx-auto px-4 py-6 sm:py-8 sm:px-6 lg:px-8"
         }>
           {/* 头部 - 截图模式下隐藏 */}
           {!isScreenshotMode && (
@@ -711,7 +710,7 @@ function App() {
               )}
 
               {effectiveViewMode === 'grid' && (
-                <div data-heatmap-container className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div data-heatmap-container className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
                   {filteredData.map((item) => (
                     <StatusCard
                       key={item.id}
@@ -731,7 +730,6 @@ function App() {
           )}
 
           {/* 免责声明 - 截图模式下隐藏 */}
-          {!isScreenshotMode && <Footer />}
         </div>
       </div>
     </>

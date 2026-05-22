@@ -77,7 +77,7 @@ function StatusCardComponent({
 
   return (
     <div
-      className={`group relative ${baseBgClass} border border-default hover:border-accent/30 ${hasLeftBorder ? 'rounded-l-sm border-l-2' : 'rounded-l-2xl'} rounded-r-2xl p-4 sm:p-6 transition-all duration-300 hover:shadow-accent-lg backdrop-blur-sm overflow-hidden`}
+      className={`group relative ${baseBgClass} border border-default hover:border-accent/30 ${hasLeftBorder ? 'rounded-l-sm border-l-2' : 'rounded-l-2xl'} rounded-r-2xl p-5 sm:p-6 transition-all duration-300 hover:shadow-accent-lg backdrop-blur-sm overflow-hidden`}
       style={borderColor ? { borderLeftColor: borderColor } : undefined}
     >
       {/* 注解行 - 仅在有注解时显示 */}
@@ -91,7 +91,7 @@ function StatusCardComponent({
       <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 mb-6">
         {/* 左侧：图标 + 服务信息 */}
         <div className="flex gap-3 sm:gap-4 items-start sm:items-center">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 rounded-xl bg-elevated flex items-center justify-center border border-default group-hover:border-strong transition-colors text-primary">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 rounded-2xl bg-elevated flex items-center justify-center border border-default group-hover:border-strong transition-colors text-primary">
             {ServiceIcon ? (
               <ServiceIcon className="w-5 h-5 sm:w-6 sm:h-6" />
             ) : item.serviceType === 'cc' ? (

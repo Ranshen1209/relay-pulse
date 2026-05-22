@@ -1,59 +1,59 @@
 /**
- * Light Cool 主题
- * 冷灰白底，偏蓝灰，专业清爽
+ * Light 主题（Sakrylle Monet 莫奈淡紫）
+ * 暖灰白底带微紫调，搭配莫奈紫罗兰强调色
  */
 
 [data-theme="light-cool"] {
   color-scheme: light;
 
-  /* 背景层次 - 冷灰白 */
-  --bg-page: 210 25% 97%;           /* 微蓝白 */
-  --bg-surface: 210 22% 94%;        /* 浅冷灰 */
-  --bg-elevated: 210 20% 97%;       /* 纯白卡片（降低亮度避免刺眼） */
-  --bg-muted: 210 15% 90%;          /* 分区背景 */
+  /* 背景层次 - 莫奈淡紫白 */
+  --bg-page: 256 30% 97%;           /* 极淡紫白 */
+  --bg-surface: 256 22% 94%;        /* 浅紫灰卡片底 */
+  --bg-elevated: 256 30% 98%;       /* 近白卡片 */
+  --bg-muted: 256 18% 90%;          /* 分区背景 */
 
   /* 文字层次 */
-  --text-primary: 215 28% 17%;      /* 深蓝灰 */
-  --text-secondary: 215 18% 40%;    /* 中灰 */
-  --text-muted: 215 12% 55%;        /* 浅灰 */
-  --text-inverse: 210 25% 98%;      /* 白色 */
+  --text-primary: 256 28% 18%;      /* 深紫灰 */
+  --text-secondary: 256 14% 40%;    /* 中紫灰 */
+  --text-muted: 256 10% 55%;        /* 浅紫灰 */
+  --text-inverse: 256 30% 98%;      /* 反色文字（白） */
 
   /* 边框 */
-  --border-default: 215 18% 85%;
-  --border-strong: 215 15% 75%;
+  --border-default: 256 18% 85%;
+  --border-strong: 256 15% 75%;
 
-  /* 强调色 - 冷青蓝 */
-  --accent: 192 80% 42%;            /* 冷青蓝 */
-  --accent-strong: 194 85% 35%;
+  /* 强调色 - 莫奈紫罗兰 #9181bd 系 */
+  --accent: 256 31% 62%;            /* #9181bd Sakrylle 主紫 */
+  --accent-strong: 256 35% 54%;     /* 加深主紫，仅用于 hover/strong 状态 */
 
   /* 状态色 */
   --success: 144 55% 36%;
   --warning: 38 92% 45%;
   --danger: 352 75% 50%;
-  --info: 217 80% 50%;              /* 冷蓝 */
+  --info: 256 38% 56%;              /* info 也走紫色调，避免冷蓝 */
 
   /* 图表色 */
   --chart-green: 144 55% 36%;
   --chart-yellow: 38 92% 45%;
   --chart-red: 352 75% 50%;
-  --chart-gray: 215 15% 65%;
+  --chart-gray: 256 12% 65%;
 
   /* 服务类型色 */
   --service-cc: 15 63% 50%;           /* Claude 橙色（亮色主题稍暗） */
-  --service-cx: 215 28% 17%;          /* 跟随主文字色 */
+  --service-cx: 256 28% 18%;          /* 跟随主文字色 */
   --service-gm: 215 100% 50%;         /* Gemini 蓝色（亮色主题稍暗） */
 
   /* 辅助色 */
-  --blue: 217 80% 50%;
-  --blue-muted: 217 70% 55%;
+  --blue: 256 38% 56%;
+  --blue-muted: 256 32% 60%;
 
-  /* 渐变（冷调紫罗兰 → 雾蓝） */
-  --gradient-hero: linear-gradient(135deg, hsl(256 38% 56%), hsl(217 50% 55%));
-  --gradient-button: linear-gradient(to bottom right, hsl(256 38% 56%), hsl(256 42% 48%));
+  /* 渐变 - 莫奈淡紫 → 雾紫白 */
+  --gradient-hero: linear-gradient(135deg, hsl(256 31% 62%), hsl(280 28% 70%));
+  --gradient-button: linear-gradient(to bottom right, hsl(256 31% 62%), hsl(256 35% 54%));
 
   /* 发光效果 - 亮色主题降低透明度 */
   --glow-success: 144 55% 36% / 0.4;
   --glow-warning: 38 92% 45% / 0.4;
   --glow-danger: 352 75% 50% / 0.4;
-  --glow-muted: 215 15% 65% / 0.3;
+  --glow-muted: 256 12% 65% / 0.3;
 }

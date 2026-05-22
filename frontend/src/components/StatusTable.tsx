@@ -21,7 +21,7 @@ import type { ProcessedMonitorData, SortConfig } from '../types';
 type HistoryPoint = ProcessedMonitorData['history'][number];
 
 // 虚拟滚动常量
-const MOBILE_ROW_HEIGHT = 160;  // 移动端卡片高度（约 150px 内容 + 10px 间距）
+const MOBILE_ROW_HEIGHT = 200;  // 移动端卡片高度（提升呼吸感：内容约 188px + 12px 间距）
 const MOBILE_MAX_HEIGHT = 800;  // 移动端列表最大高度
 
 // ServiceIcon 模块级缓存，避免重复调用 getServiceIconComponent
@@ -184,7 +184,7 @@ function MobileRow({ index, style, data, slowLatencyMs, enableAnnotations, showP
   const item = data[index];
   return (
     <div style={style}>
-      <div style={{ marginBottom: 8 }}>
+      <div style={{ marginBottom: 12 }}>
         <MobileListItem
           item={item}
           slowLatencyMs={slowLatencyMs}
@@ -248,13 +248,13 @@ function MobileListItem({
   const pinnedBgClass = item.pinned ? sponsorLevelToPinnedBgClass(item.sponsorLevel) : '';
   const baseBgClass = pinnedBgClass || 'bg-surface/60';
 
-  // 卡片最小高度 = 行高(160) - 行间距(8) = 152px
+  // 卡片最小高度 = 行高(200) - 行间距(12) = 188px
   // 确保所有卡片高度一致，避免虚拟列表中间距不均
-  const cardMinHeight = 152;
+  const cardMinHeight = 188;
 
   return (
     <div
-      className={`${baseBgClass} border border-default rounded-r-xl ${hasLeftBorder ? 'rounded-l-sm border-l-2' : 'rounded-l-xl'} p-3 space-y-2`}
+      className={`${baseBgClass} border border-default rounded-r-2xl ${hasLeftBorder ? 'rounded-l-sm border-l-2' : 'rounded-l-2xl'} p-4 space-y-3`}
       style={{
         ...(borderColor ? { borderLeftColor: borderColor } : {}),
         minHeight: cardMinHeight,
@@ -269,7 +269,7 @@ function MobileListItem({
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0 flex-1">
           {/* 服务图标 */}
-          <div className="w-8 h-8 flex-shrink-0 rounded-lg bg-elevated flex items-center justify-center border border-default text-primary">
+          <div className="w-8 h-8 flex-shrink-0 rounded-2xl bg-elevated flex items-center justify-center border border-default text-primary">
             {ServiceIcon ? (
               <ServiceIcon className="w-4 h-4" />
             ) : item.serviceType === 'cc' ? (

@@ -23,9 +23,9 @@
   --border-default: 217 24% 20%;    /* slate-800 偏亮 */
   --border-strong: 215 20% 28%;     /* slate-700 */
 
-  /* 强调色 (Sakrylle Monet 紫罗兰) */
-  --accent: 256 50% 70%;            /* 暗底上提亮的紫罗兰 */
-  --accent-strong: 256 31% 62%;     /* #9181bd Sakrylle 主紫 */
+  /* 强调色 (Sakrylle Monet 莫奈淡紫) */
+  --accent: 256 55% 75%;            /* 深底上的莫奈淡紫，明显更柔 */
+  --accent-strong: 256 50% 68%;     /* 比 accent 略深，用于按钮 hover/strong */
 
   /* 状态色 */
   --success: 152 56% 45%;           /* #10b981 emerald-500 */
@@ -48,9 +48,9 @@
   --blue: 217 91% 60%;              /* blue-500 */
   --blue-muted: 217 91% 60%;        /* blue-400 */
 
-  /* 渐变（Monet 紫罗兰 → 雾蓝） */
-  --gradient-hero: linear-gradient(135deg, hsl(256 50% 70%), hsl(220 40% 75%));
-  --gradient-button: linear-gradient(to bottom right, hsl(256 31% 62%), hsl(256 50% 70%));
+  /* 渐变（Monet 莫奈淡紫） */
+  --gradient-hero: linear-gradient(135deg, hsl(256 55% 75%), hsl(280 45% 78%));
+  --gradient-button: linear-gradient(to bottom right, hsl(256 55% 75%), hsl(256 50% 68%));
 
   /* 发光效果 */
   --glow-success: 152 56% 45% / 0.6;
