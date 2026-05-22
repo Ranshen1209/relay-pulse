@@ -1,5 +1,6 @@
 import type { Annotation, AnnotationFamily } from '../../types';
 import { AnnotationChip } from './AnnotationChip';
+import { filterVisibleAnnotations } from '../../utils/annotationUtils';
 
 interface AnnotationCellProps {
   annotations?: Annotation[];
@@ -19,18 +20,21 @@ function pickFamily(annotations: Annotation[], family: AnnotationFamily): Annota
  * 2. neutral（中性，蓝色）
  * 3. 分隔符 |（仅在正/中性 和 负向 都存在时显示）
  * 4. negative（负向，黄色/红色）
+ *
+ * Sakrylle 主题：通过 filterVisibleAnnotations 过滤掉隐藏的注解（频率、公益站、赞助等级、Key Type）。
  */
 export function AnnotationCell({
   annotations = [],
   className = '',
   tooltipPlacement = 'top',
 }: AnnotationCellProps) {
-  if (annotations.length === 0) return null;
+  const visible = filterVisibleAnnotations(annotations);
+  if (visible.length === 0) return null;
 
   // 后端已保证排序（family → priority desc → id asc），这里只按 family 分组
-  const positive = pickFamily(annotations, 'positive');
-  const neutral = pickFamily(annotations, 'neutral');
-  const negative = pickFamily(annotations, 'negative');
+  const positive = pickFamily(visible, 'positive');
+  const neutral = pickFamily(visible, 'neutral');
+  const negative = pickFamily(visible, 'negative');
   const hasLeading = positive.length > 0 || neutral.length > 0;
 
   return (

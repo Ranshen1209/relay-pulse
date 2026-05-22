@@ -8,7 +8,6 @@ import { ExternalLink } from './ExternalLink';
 import { FavoriteButton } from './FavoriteButton';
 import { getTimeRanges } from '../constants';
 import { availabilityToColor, latencyToColor, sponsorLevelToCardBorderColor, sponsorLevelToPinnedBgClass } from '../utils/color';
-import { formatPriceRatioStructured } from '../utils/format';
 import { aggregateHeatmap } from '../utils/heatmapAggregator';
 import { getServiceIconComponent } from './ServiceIcon';
 import { AnnotationCell } from './annotations';
@@ -136,21 +135,6 @@ function StatusCardComponent({
                   {t('card.uptime')} {item.uptime >= 0 ? `${item.uptime}%` : '--'}
                 </span>
               </span>
-              {(item.priceMin != null || item.priceMax != null) && (() => {
-                const priceData = formatPriceRatioStructured(item.priceMin, item.priceMax);
-                if (!priceData) return null;
-                return (
-                  <span className="text-secondary">
-                    {t('table.headers.priceRatio')}: <span className="text-secondary">{priceData.base}</span>
-                    {priceData.sub && <span className="text-muted text-[10px] ml-0.5">({priceData.sub})</span>}
-                  </span>
-                );
-              })()}
-              {item.listedDays != null && (
-                <span className="text-secondary">
-                  {t('table.headers.listedDays')}: <span className="text-secondary">{item.listedDays}d</span>
-                </span>
-              )}
             </div>
           </div>
         </div>

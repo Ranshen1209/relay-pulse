@@ -43,8 +43,6 @@
   "header": {
     "brand": "Sakrylle Status",
     "tagline": "Sakrylle API 服务可用性监测",
-    "contactBtn": "联系我们",
-    "contactBtnShort": "联系",
     "stats": {
       "healthy": "正常运行",
       "issues": "异常告警"
@@ -236,27 +234,7 @@
     "httpCodeBreakdown": "错误码分布"
   },
   "footer": {
-    "disclaimer": {
-      "title": "平台声明",
-      "dataReference": {
-        "title": "真实消耗探测",
-        "text": "基于真实 Token 消耗发起探测，数据受当时网络环境及服务商负载影响，真实还原 API 响应质量"
-      },
-      "neutralMaintenance": {
-        "title": "开源透明运营",
-        "text": "全站代码遵循 MIT 协议完全开源，支持私有化部署验证。赞助商享有置顶展示、专属标签和高频监测权益，但可用率等监测数据始终客观真实"
-      },
-      "monitoringScope": {
-        "title": "全栈协议校验",
-        "text": "涵盖 TCP 连通性、RTT 延迟及响应内容深度校验。有效识别连接正常但无法对话的「API 假活」状态"
-      },
-      "liability": {
-        "title": "免责声明",
-        "text": "监测数据仅供技术参考，不构成对任何第三方服务商信誉或资金安全的背书。用户与服务商的交互风险自负"
-      }
-    },
-    "issuesBtn": "问题反馈",
-    "openSourceLabel": "开源项目，欢迎贡献"
+    "githubAria": "GitHub"
   },
   "provider": {
     "pageTitle": "{{name}} - 服务监测",
@@ -280,12 +258,6 @@
     "composite": "综合",
     "modelPrefix": "🔄"
   },
-  "share": {
-    "share": "分享",
-    "shareShort": "分享",
-    "linkCopied": "链接已复制到剪贴板",
-    "copyFailed": "复制失败，请手动复制链接"
-  },
   "externalLink": {
     "title": "即将离开 Sakrylle Status",
     "target": "目标网站",
@@ -303,13 +275,9 @@
     "switchTheme": "切换主题",
     "selectTheme": "选择主题",
     "defaultDark": "默认暗色",
-    "nightDark": "护眼暗色",
     "lightCool": "冷灰亮色",
-    "lightWarm": "暖灰亮色",
     "defaultDarkShort": "暗色",
-    "nightDarkShort": "护眼",
-    "lightCoolShort": "冷亮",
-    "lightWarmShort": "暖亮"
+    "lightCoolShort": "冷亮"
   },
   "community": {
     "title": "加入社群",
@@ -326,206 +294,6 @@
     "close": "关闭",
     "discussions": "讨论",
     "moreAnnouncements": "还有 {{count}} 条公告"
-  },
-  "onboarding": {
-    "meta": {
-      "title": "申请收录",
-      "description": "提交您的 API 服务到 Sakrylle Status 监测平台"
-    },
-    "title": "申请收录",
-    "description": "提交您的 API 服务信息，通过连通性测试后即可申请收录",
-    "loading": "正在加载表单配置...",
-    "metaErrorHint": "该功能可能尚未启用，请联系管理员",
-    "next": "下一步",
-    "back": "上一步",
-    "providerInfo": {
-      "title": "服务商信息",
-      "agreementText": "我已阅读并同意",
-      "agreementLink": "收录协议",
-      "providerName": "服务商名称",
-      "providerNamePlaceholder": "例如：MyService",
-      "websiteUrl": "官网地址",
-      "category": "类别",
-      "categories": { "commercial": "商业站", "public": "公益站" },
-      "serviceType": "服务类型",
-      "serviceTypes": { "cc": "CC", "cx": "CX", "gm": "GM" },
-      "identity": "您的身份",
-      "identities": {
-        "publicOwner": "公益站站长",
-        "publicOwnerDesc": "提交自己的公益站，用于测试或研究，免费接入",
-        "commercialOwner": "商业站站长",
-        "commercialOwnerDesc": "提交自己的商业站，通过平台推广获客",
-        "personal": "个人用户",
-        "personalDesc": "推荐优秀的中转站，通过 Aff 链接获取奖励"
-      },
-      "sponsorLevel": "赞助等级",
-      "sponsorLevels": {
-        "public": "公益链路",
-        "signal": "信号链路",
-        "pulse": "脉冲链路"
-      },
-      "channelType": "通道类型",
-      "channelTypes": {
-        "O": "官方通道",
-        "ODesc": "自建号池，直接对接上游官方接口（如 Anthropic Console、Claude 订阅、Bedrock 等），不经第三方逆向",
-        "R": "逆向通道",
-        "RDesc": "非原生支持渠道，通过技术手段适配（如逆向 Web 登录或第三方脚本）",
-        "M": "混合通道",
-        "MDesc": "以上两种并存，或接入第三方兜底（如官方主备 + 逆向备用池）"
-      },
-      "channelSource": "通道来源",
-      "customSource": "自定义...",
-      "customSourcePlaceholder": "输入自定义来源",
-      "channelSourceCustomPlaceholder": "输入来源名称（大写字母/数字）",
-      "channelCodePreview": "通道标识预览",
-      "optional": "（可选）"
-    },
-    "connectionTest": {
-      "title": "连通性测试",
-      "description": "输入您的 API 接入信息并运行测试，测试通过后方可提交申请",
-      "baseUrl": "API 基础地址",
-      "baseUrlHint": "必须使用 HTTPS 协议",
-      "apiKey": "API Key",
-      "apiKeyPlaceholder": "输入 API Key",
-      "apiKeyHint": "仅用于验证与监测授权，将加密存储",
-      "showApiKey": "显示 API Key",
-      "hideApiKey": "隐藏 API Key",
-      "testType": "服务类型",
-      "testVariant": "请求模板",
-      "variantHint": "选择用于测试的模型模板（不同模型可能鉴权策略不同）",
-      "variants": {
-        "cc-haiku-pro-2184": "Haiku Pro (2.1.84)"
-      },
-      "runTest": "运行测试",
-      "testing": "测试中...",
-      "resultTitle": "测试结果",
-      "probeStatus": "探测状态",
-      "latency": "延迟",
-      "httpCode": "HTTP 状态码",
-      "subStatus": "细分状态",
-      "error": "错误信息",
-      "proofValid": "测试证明有效（剩余 {{time}}）",
-      "proofExpired": "测试证明已过期，请重新测试"
-    },
-    "test": {
-      "statusAvailable": "可用",
-      "statusDegraded": "波动",
-      "statusUnavailable": "不可用",
-      "statusUnknown": "未知"
-    },
-    "confirm": {
-      "title": "确认提交",
-      "description": "请确认以下信息无误后提交申请",
-      "sectionProvider": "服务商信息",
-      "sectionConnection": "接入信息",
-      "copy": "复制",
-      "submit": "提交申请",
-      "submitting": "提交中...",
-      "successTitle": "申请已提交！",
-      "successDescription": "我们会尽快审核您的申请",
-      "publicId": "申请编号",
-      "publicIdHint": "请保存此编号，用于查询申请状态",
-      "contactLabel": "联系审核",
-      "copyTemplateHint": "一键复制联系模板：",
-      "contactTemplate": "您好，我提交了一个收录申请（编号：{{id}}，服务商：{{provider}}），请审核。",
-      "newSubmission": "提交新申请"
-    }
-  },
-  "contact": {
-    "meta": {
-      "title": "联系我们 | Sakrylle Status",
-      "description": "申请收录、变更通道配置或提交反馈"
-    },
-    "title": "联系我们",
-    "description": "选择您需要的服务，我们将为您提供帮助",
-    "apply": {
-      "title": "申请收录",
-      "description": "提交新的 API 服务到 Sakrylle Status 监测平台"
-    },
-    "change": {
-      "title": "申请变更",
-      "description": "修改已收录通道的配置信息（如地址、密钥等）"
-    },
-    "feedback": {
-      "title": "提交反馈",
-      "description": "建议、问题反馈或其他事务"
-    },
-    "community": {
-      "title": "加入社群",
-      "description": "加入 QQ 群，与其他用户交流"
-    },
-    "discussions": {
-      "title": "参与讨论",
-      "description": "在 GitHub Discussions 提问、分享和交流"
-    }
-  },
-  "changeRequest": {
-    "meta": {
-      "title": "申请变更 | Sakrylle Status",
-      "description": "修改已收录通道的配置信息"
-    },
-    "title": "申请变更",
-    "subtitle": "使用您的 API Key 验证身份，修改已收录通道的配置",
-    "steps": {
-      "auth": "身份验证",
-      "edit": "编辑信息",
-      "test": "连通测试",
-      "review": "确认提交"
-    },
-    "back": "返回",
-    "next": "下一步",
-    "auth": {
-      "title": "身份验证",
-      "description": "请输入您在本平台已收录通道的 API Key，系统将自动匹配对应的通道",
-      "placeholder": "输入 API Key",
-      "submit": "验证",
-      "invalidKey": "请输入有效的 API Key（至少 10 个字符）",
-      "authFailed": "API Key 验证失败"
-    },
-    "edit": {
-      "title": "编辑通道信息",
-      "description": "修改 {{channel}} 通道的配置信息，留空表示不修改",
-      "selectChannel": "选择通道",
-      "multipleChannels": "您的 API Key 匹配到多个通道，请选择需要变更的通道",
-      "current": "当前值",
-      "noChange": "不修改",
-      "newApiKeyPlaceholder": "如需更换 API Key，请在此输入新的",
-      "noChanges": "请至少修改一个字段"
-    },
-    "fields": {
-      "providerName": "服务商名称",
-      "providerUrl": "官网地址",
-      "channelName": "通道名称",
-      "category": "类别",
-      "sponsorLevel": "赞助等级",
-      "baseUrl": "API 基础地址",
-      "newApiKey": "新 API Key"
-    },
-    "test": {
-      "title": "连通性测试",
-      "description": "您修改了监测相关配置，需要通过连通性测试后才能提交",
-      "testType": "服务类型",
-      "variant": "请求模板",
-      "run": "运行测试",
-      "running": "测试中，请稍候...",
-      "passed": "测试通过",
-      "failed": "测试未通过",
-      "latency": "延迟",
-      "retry": "重新测试",
-      "requestFailed": "测试请求失败"
-    },
-    "review": {
-      "title": "确认变更",
-      "description": "请确认以下变更信息无误后提交",
-      "target": "目标通道",
-      "submit": "提交变更",
-      "submitFailed": "提交失败"
-    },
-    "done": {
-      "title": "变更请求已提交",
-      "description": "您的变更请求已提交，请保存以下编号用于查询进度",
-      "newRequest": "提交新的变更"
-    }
   },
   "admin": {
     "meta": {

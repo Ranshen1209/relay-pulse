@@ -19,12 +19,8 @@ function ThemeIcon({ themeId, size = 16 }: { themeId: ThemeId; size?: number }) 
   switch (themeId) {
     case 'default-dark':
       return <Moon size={size} />;
-    case 'night-dark':
-      return <Moon size={size} className="text-warning" />;
     case 'light-cool':
       return <Sun size={size} />;
-    case 'light-warm':
-      return <Sun size={size} className="text-warning" />;
     default:
       return <Palette size={size} />;
   }

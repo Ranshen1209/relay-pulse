@@ -9,14 +9,12 @@ interface RefreshButtonProps {
   onToggleAutoRefresh?: () => void;
   /** 按钮尺寸：'sm' 用于移动端，'md' 用于桌面端 */
   size?: 'sm' | 'md';
-  /** 是否显示右上角 toggle 圆点，默认 true。false 时状态通过颜色表示，点击=切换+刷新 */
-  showToggle?: boolean;
 }
 
 /**
  * 合并的刷新按钮组件
- * - 点击刷新图标：执行手动刷新
- * - 右上角微型 toggle：切换自动刷新开关（可选）
+ * - 点击：切换自动刷新开关 + 立即刷新（冷却期内不切换状态）
+ * - 自动刷新状态通过按钮颜色表示（开启=success，关闭=muted）
  */
 export function RefreshButton({
   loading,
@@ -25,7 +23,6 @@ export function RefreshButton({
   onRefresh,
   onToggleAutoRefresh,
   size = 'md',
-  showToggle = true,
 }: RefreshButtonProps) {
   const { t } = useTranslation();
 
@@ -34,29 +31,30 @@ export function RefreshButton({
   const iconSize = isSmall ? 14 : 16;
   const minSize = isSmall ? '' : 'w-8 h-8';
 
-  // 点击处理：showToggle=false 时，切换状态 + 刷新（冷却期内不切换，只显示冷却提示）
+  // 点击处理：切换状态 + 刷新（冷却期内不切换状态）
   const handleClick = () => {
-    if (!showToggle && onToggleAutoRefresh && !refreshCooldown) {
+    if (onToggleAutoRefresh && !refreshCooldown) {
       onToggleAutoRefresh();
     }
     onRefresh();
   };
 
-  // 按钮样式：showToggle=false 且有 onToggleAutoRefresh 时根据 autoRefresh 状态决定颜色
-  const buttonStyles = !showToggle && onToggleAutoRefresh
+  // 按钮样式：根据 autoRefresh 状态决定颜色
+  const buttonStyles = onToggleAutoRefresh
     ? autoRefresh
       ? 'bg-success/10 text-success border-success/50 hover:bg-success/20'
       : 'bg-elevated/50 text-muted border-muted hover:bg-muted/30'
     : 'bg-accent/10 text-accent border-accent/20 hover:bg-accent/20';
 
-  // 提示文案：showToggle=false 且有 onToggleAutoRefresh 时说明点击会切换状态
-  const buttonTitle = !showToggle && onToggleAutoRefresh
-    ? (autoRefresh ? t('controls.autoRefresh.enabledHint') : t('controls.autoRefresh.disabledHint'))
+  // 提示文案
+  const buttonTitle = onToggleAutoRefresh
+    ? autoRefresh
+      ? t('controls.autoRefresh.enabledHint')
+      : t('controls.autoRefresh.disabledHint')
     : t('common.refresh');
 
   return (
     <div className="relative inline-flex items-center">
-      {/* 刷新按钮 */}
       <button
         type="button"
         onClick={handleClick}
@@ -69,31 +67,6 @@ export function RefreshButton({
           className={loading ? 'animate-spin' : ''}
         />
       </button>
-
-      {/* 自动刷新状态圆点（仅在 showToggle=true 且 onToggleAutoRefresh 存在时显示） */}
-      {showToggle && onToggleAutoRefresh && (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleAutoRefresh();
-          }}
-          className="absolute -top-1 -right-1 z-10 w-5 h-5 grid place-items-center cursor-pointer touch-manipulation select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 rounded-full"
-          title={autoRefresh ? t('controls.autoRefresh.enabledHint') : t('controls.autoRefresh.disabledHint')}
-          aria-label={t('controls.autoRefresh.toggle')}
-          aria-pressed={autoRefresh}
-        >
-          {/* 状态圆点：开启=青色，关闭=灰色，无边框 */}
-          <span
-            aria-hidden="true"
-            className={`w-2.5 h-2.5 rounded-full transition-all duration-200 ${
-              autoRefresh
-                ? 'bg-accent/70'
-                : 'bg-secondary/50'
-            }`}
-          />
-        </button>
-      )}
 
       {/* 冷却提示 */}
       {refreshCooldown && (

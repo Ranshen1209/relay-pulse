@@ -347,52 +347,27 @@ export function heatmapBlockToStyle(point: HeatmapPoint, useLatencyGradient = fa
 
 /**
  * 根据赞助等级返回左边框 Tailwind 类名（用于表格行）
- * 使用固定颜色，不随主题变化（品牌一致性）
+ *
+ * Sakrylle 主题：禁用所有赞助等级左边框装饰，统一返回空字符串。
  */
-export function sponsorLevelToBorderClass(level?: string): string {
-  if (!level) return '';
-  const BORDER_CLASSES: Record<string, string> = {
-    public: 'border-l-2 border-sponsor-public',
-    signal: 'border-l-2 border-sponsor-signal',
-    pulse: 'border-l-2 border-sponsor-pulse',
-    beacon: 'border-l-2 border-sponsor-beacon',
-    backbone: 'border-l-2 border-sponsor-backbone',
-    core: 'border-l-2 border-sponsor-core',
-  };
-  return BORDER_CLASSES[level] || '';
+export function sponsorLevelToBorderClass(_level?: string): string {
+  return '';
 }
 
 /**
  * 根据赞助等级返回卡片左边框颜色
- * 使用固定颜色值，不随主题变化（品牌一致性）
+ *
+ * Sakrylle 主题：禁用所有赞助等级左边框装饰，统一返回 undefined。
  */
-export function sponsorLevelToCardBorderColor(level?: string): string | undefined {
-  if (!level) return undefined;
-  // 固定颜色：public=slate, signal=sky, pulse=amber-orange, beacon=emerald, backbone=amber, core=gold
-  const BORDER_COLORS: Record<string, string> = {
-    public: 'hsl(215 16% 55% / 0.35)',
-    signal: 'hsl(199 89% 48% / 0.4)',
-    pulse: 'hsl(32 94% 56% / 0.4)',
-    beacon: 'hsl(152 76% 39% / 0.4)',
-    backbone: 'hsl(38 92% 50% / 0.4)',
-    core: 'hsl(43 96% 56% / 0.4)',
-  };
-  return BORDER_COLORS[level];
+export function sponsorLevelToCardBorderColor(_level?: string): string | undefined {
+  return undefined;
 }
 
 /**
  * 根据赞助等级返回置顶背景色（语义化 CSS 类名）
- * 使用固定颜色（5% 透明度），不随主题变化（品牌一致性）
+ *
+ * Sakrylle 主题：禁用所有赞助等级置顶背景色，统一返回空字符串。
  */
-export function sponsorLevelToPinnedBgClass(level?: string): string {
-  if (!level) return '';
-  const BG_CLASSES: Record<string, string> = {
-    public: 'bg-sponsor-public',
-    signal: 'bg-sponsor-signal',
-    pulse: 'bg-sponsor-pulse',
-    beacon: 'bg-sponsor-beacon',
-    backbone: 'bg-sponsor-backbone',
-    core: 'bg-sponsor-core',
-  };
-  return BG_CLASSES[level] || '';
+export function sponsorLevelToPinnedBgClass(_level?: string): string {
+  return '';
 }

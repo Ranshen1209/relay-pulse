@@ -43,8 +43,6 @@
   "header": {
     "brand": "Sakrylle Status",
     "tagline": "Live availability monitor for Sakrylle API",
-    "contactBtn": "Contact Us",
-    "contactBtnShort": "Contact",
     "stats": {
       "healthy": "Operational",
       "issues": "Issues detected"
@@ -236,27 +234,7 @@
     "httpCodeBreakdown": "HTTP code breakdown"
   },
   "footer": {
-    "disclaimer": {
-      "title": "Platform Statement",
-      "dataReference": {
-        "title": "Real Consumption Probing",
-        "text": "Probes are initiated based on actual token usage; results vary with network conditions and provider load, faithfully reflecting API response quality"
-      },
-      "neutralMaintenance": {
-        "title": "Open and Transparent Operations",
-        "text": "Entire codebase is open source under MIT license, self-hosting available for verification. Sponsors receive pinned display, exclusive tags, and high-frequency monitoring, but availability data remains objective and accurate"
-      },
-      "monitoringScope": {
-        "title": "Full-Stack Protocol Verification",
-        "text": "Covers TCP connectivity, RTT latency, and deep validation of response content, effectively detecting \"fake alive\" APIs that connect but cannot converse"
-      },
-      "liability": {
-        "title": "Disclaimer",
-        "text": "Monitoring data is for technical reference only and does not constitute endorsement of any third-party provider's credibility or financial security. Users interact with providers at their own risk"
-      }
-    },
-    "issuesBtn": "Report an issue",
-    "openSourceLabel": "Open source project, contributions welcome"
+    "githubAria": "GitHub"
   },
   "provider": {
     "pageTitle": "{{name}} - Service Monitoring",
@@ -280,12 +258,6 @@
     "composite": "Composite",
     "modelPrefix": "🔄"
   },
-  "share": {
-    "share": "Share",
-    "shareShort": "Share",
-    "linkCopied": "Link copied to clipboard",
-    "copyFailed": "Failed to copy, please copy the link manually"
-  },
   "externalLink": {
     "title": "Leaving Sakrylle Status",
     "target": "Target website",
@@ -303,13 +275,9 @@
     "switchTheme": "Switch theme",
     "selectTheme": "Select theme",
     "defaultDark": "Default Dark",
-    "nightDark": "Night Dark",
     "lightCool": "Light Cool",
-    "lightWarm": "Light Warm",
     "defaultDarkShort": "Dark",
-    "nightDarkShort": "Night",
-    "lightCoolShort": "Cool",
-    "lightWarmShort": "Warm"
+    "lightCoolShort": "Cool"
   },
   "community": {
     "title": "Join Community",
@@ -326,203 +294,6 @@
     "close": "Close",
     "discussions": "Discussions",
     "moreAnnouncements": "{{count}} more announcement(s)"
-  },
-  "onboarding": {
-    "meta": { "title": "Apply for Listing", "description": "Submit your API service to Sakrylle Status monitoring platform" },
-    "title": "Apply for Listing",
-    "description": "Submit your API service info and pass the connectivity test to apply",
-    "loading": "Loading form configuration...",
-    "metaErrorHint": "This feature may not be enabled yet. Please contact the administrator.",
-    "next": "Next",
-    "back": "Back",
-    "providerInfo": {
-      "title": "Provider Information",
-      "agreementText": "I have read and agree to the",
-      "agreementLink": "listing agreement",
-      "providerName": "Provider Name",
-      "providerNamePlaceholder": "e.g. MyService",
-      "websiteUrl": "Website URL",
-      "category": "Category",
-      "categories": { "commercial": "Commercial", "public": "Public" },
-      "serviceType": "Service Type",
-      "serviceTypes": { "cc": "CC", "cx": "CX", "gm": "GM" },
-      "identity": "Your Role",
-      "identities": {
-        "publicOwner": "Public Site Owner",
-        "publicOwnerDesc": "Submit your public site for testing or research, free to join",
-        "commercialOwner": "Commercial Site Owner",
-        "commercialOwnerDesc": "Submit your commercial site to attract users via the platform",
-        "personal": "Individual User",
-        "personalDesc": "Recommend great relay sites and earn rewards via affiliate links"
-      },
-      "sponsorLevel": "Sponsor Level",
-      "sponsorLevels": {
-        "public": "Public",
-        "signal": "Signal",
-        "pulse": "Pulse"
-      },
-      "channelType": "Channel Type",
-      "channelTypes": {
-        "O": "Official",
-        "ODesc": "Provider-owned account pool connected directly to the upstream official API (e.g. Anthropic Console, Claude subscription, Bedrock). No third-party reverse engineering.",
-        "R": "Reverse",
-        "RDesc": "Non-native channel adapted via technical means (e.g. reverse-engineered web sessions or third-party scripts).",
-        "M": "Mixed",
-        "MDesc": "Combination of both, or official with third-party fallback pools (e.g. official primary + reverse-engineered backup)."
-      },
-      "channelSource": "Channel Source",
-      "customSource": "Custom...",
-      "customSourcePlaceholder": "Enter custom source",
-      "channelSourceCustomPlaceholder": "Enter source name (uppercase/digits)",
-      "channelCodePreview": "Channel Code Preview",
-      "optional": "(optional)"
-    },
-    "connectionTest": {
-      "title": "Connectivity Test",
-      "description": "Enter your API credentials and run a test. You can submit after the test passes.",
-      "baseUrl": "API Base URL",
-      "baseUrlHint": "Must use HTTPS",
-      "apiKey": "API Key",
-      "apiKeyPlaceholder": "Enter API Key",
-      "apiKeyHint": "Used only for verification and monitoring, stored encrypted",
-      "showApiKey": "Show API Key",
-      "hideApiKey": "Hide API Key",
-      "testType": "Service Type",
-      "testVariant": "Request Template",
-      "variantHint": "Choose which model template to test (auth policy may differ by model).",
-      "variants": {
-        "cc-haiku-pro-2184": "Haiku Pro (2.1.84)"
-      },
-      "runTest": "Run Test",
-      "testing": "Testing...",
-      "resultTitle": "Test Result",
-      "probeStatus": "Probe Status",
-      "latency": "Latency",
-      "httpCode": "HTTP Code",
-      "subStatus": "Sub Status",
-      "error": "Error",
-      "proofValid": "Test proof valid ({{time}} remaining)",
-      "proofExpired": "Test proof expired, please re-run the test"
-    },
-    "test": {
-      "statusAvailable": "Available",
-      "statusDegraded": "Degraded",
-      "statusUnavailable": "Unavailable",
-      "statusUnknown": "Unknown"
-    },
-    "confirm": {
-      "title": "Confirm & Submit",
-      "description": "Please review the information below and submit your application",
-      "sectionProvider": "Provider Information",
-      "sectionConnection": "Connection Details",
-      "copy": "Copy",
-      "submit": "Submit Application",
-      "submitting": "Submitting...",
-      "successTitle": "Application Submitted!",
-      "successDescription": "We will review your application shortly",
-      "publicId": "Application ID",
-      "publicIdHint": "Save this ID to check your application status",
-      "contactLabel": "Contact for Review",
-      "copyTemplateHint": "Copy contact template:",
-      "contactTemplate": "Hi, I submitted a listing application (ID: {{id}}, provider: {{provider}}), please review.",
-      "newSubmission": "New Application"
-    }
-  },
-  "contact": {
-    "meta": {
-      "title": "Contact Us | Sakrylle Status",
-      "description": "Apply for listing, request changes, or submit feedback"
-    },
-    "title": "Contact Us",
-    "description": "Choose the service you need, and we'll help you",
-    "apply": {
-      "title": "Apply for Listing",
-      "description": "Submit a new API service to the Sakrylle Status monitoring platform"
-    },
-    "change": {
-      "title": "Request Changes",
-      "description": "Modify the configuration of an already-listed channel (e.g. URL, API key)"
-    },
-    "feedback": {
-      "title": "Submit Feedback",
-      "description": "Suggestions, bug reports, or other inquiries"
-    },
-    "community": {
-      "title": "Join Community",
-      "description": "Join our QQ group to chat with other users"
-    },
-    "discussions": {
-      "title": "Discussions",
-      "description": "Ask questions, share ideas, and discuss on GitHub Discussions"
-    }
-  },
-  "changeRequest": {
-    "meta": {
-      "title": "Request Changes | Sakrylle Status",
-      "description": "Modify the configuration of an already-listed channel"
-    },
-    "title": "Request Changes",
-    "subtitle": "Verify your identity with your API Key to modify a listed channel's configuration",
-    "steps": {
-      "auth": "Verify",
-      "edit": "Edit",
-      "test": "Test",
-      "review": "Review"
-    },
-    "back": "Back",
-    "next": "Next",
-    "auth": {
-      "title": "Identity Verification",
-      "description": "Enter the API Key of your listed channel. The system will match the corresponding channel(s).",
-      "placeholder": "Enter API Key",
-      "submit": "Verify",
-      "invalidKey": "Please enter a valid API Key (at least 10 characters)",
-      "authFailed": "API Key verification failed"
-    },
-    "edit": {
-      "title": "Edit Channel Info",
-      "description": "Modify the configuration of channel {{channel}}. Leave blank to keep current value.",
-      "selectChannel": "Select Channel",
-      "multipleChannels": "Your API Key matches multiple channels. Please select the one you want to modify.",
-      "current": "Current",
-      "noChange": "No change",
-      "newApiKeyPlaceholder": "Enter new API Key if you want to replace it",
-      "noChanges": "Please modify at least one field"
-    },
-    "fields": {
-      "providerName": "Provider Name",
-      "providerUrl": "Website URL",
-      "channelName": "Channel Name",
-      "category": "Category",
-      "sponsorLevel": "Sponsor Level",
-      "baseUrl": "API Base URL",
-      "newApiKey": "New API Key"
-    },
-    "test": {
-      "title": "Connectivity Test",
-      "description": "You modified monitoring-related fields. A connectivity test is required before submission.",
-      "testType": "Service Type",
-      "variant": "Request Template",
-      "run": "Run Test",
-      "running": "Testing, please wait...",
-      "passed": "Test Passed",
-      "failed": "Test Failed",
-      "latency": "Latency",
-      "retry": "Retry Test",
-      "requestFailed": "Test request failed"
-    },
-    "review": {
-      "title": "Confirm Changes",
-      "description": "Please review the changes below before submitting",
-      "target": "Target Channel",
-      "submit": "Submit Changes",
-      "submitFailed": "Submission failed"
-    },
-    "done": {
-      "title": "Change Request Submitted",
-      "description": "Your change request has been submitted. Save the ID below to track progress.",
-      "newRequest": "Submit Another Request"
-    }
   },
   "admin": {
     "meta": {

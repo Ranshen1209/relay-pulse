@@ -43,8 +43,6 @@
   "header": {
     "brand": "Sakrylle Status",
     "tagline": "Sakrylle API のサービス可用性モニタ",
-    "contactBtn": "お問い合わせ",
-    "contactBtnShort": "問合せ",
     "stats": {
       "healthy": "正常稼働",
       "issues": "異常アラート"
@@ -236,27 +234,7 @@
     "httpCodeBreakdown": "HTTPコード内訳"
   },
   "footer": {
-    "disclaimer": {
-      "title": "プラットフォーム声明",
-      "dataReference": {
-        "title": "実消費ベースのプローブ",
-        "text": "実際のトークン消費に基づき計測を実行。結果は当時のネットワーク状況とプロバイダー負荷に左右され、API応答品質を忠実に反映します"
-      },
-      "neutralMaintenance": {
-        "title": "オープンで透明な運用",
-        "text": "全コードはMITライセンスで完全オープンソース、セルフホストで検証可能。スポンサーは置頂表示、専用タグ、高頻度モニタリングを享受できますが、可用率などの監視データは常に客観的かつ正確です"
-      },
-      "monitoringScope": {
-        "title": "フルスタックプロトコル検証",
-        "text": "TCP接続性、RTT遅延、応答内容の深部検証をカバーし、接続可能でも対話できない「フェイク稼働」APIを的確に検知します"
-      },
-      "liability": {
-        "title": "免責事項",
-        "text": "監視データは技術的な参考情報であり、第三者サービス提供者の信頼性や資金の安全性を保証するものではありません。ユーザーは自己責任でサービス提供者と取引してください"
-      }
-    },
-    "issuesBtn": "問題を報告",
-    "openSourceLabel": "オープンソースプロジェクトです。ぜひコントリビュートしてください"
+    "githubAria": "GitHub"
   },
   "provider": {
     "pageTitle": "{{name}} - サービス監視",
@@ -280,12 +258,6 @@
     "composite": "総合",
     "modelPrefix": "🔄"
   },
-  "share": {
-    "share": "共有",
-    "shareShort": "共有",
-    "linkCopied": "リンクをクリップボードにコピーしました",
-    "copyFailed": "コピーに失敗しました。リンクを手動でコピーしてください"
-  },
   "externalLink": {
     "title": "Sakrylle Status を離れます",
     "target": "移動先",
@@ -303,13 +275,9 @@
     "switchTheme": "テーマを切替",
     "selectTheme": "テーマを選択",
     "defaultDark": "デフォルトダーク",
-    "nightDark": "ナイトダーク",
     "lightCool": "ライトクール",
-    "lightWarm": "ライトウォーム",
     "defaultDarkShort": "暗い",
-    "nightDarkShort": "夜間",
-    "lightCoolShort": "涼色",
-    "lightWarmShort": "暖色"
+    "lightCoolShort": "涼色"
   },
   "community": {
     "title": "コミュニティ",
@@ -326,172 +294,6 @@
     "close": "閉じる",
     "discussions": "ディスカッション",
     "moreAnnouncements": "他 {{count}} 件のお知らせ"
-  },
-  "onboarding": {
-    "meta": { "title": "掲載申請", "description": "APIサービスをSakrylle Statusモニタリングプラットフォームに登録" },
-    "title": "掲載申請",
-    "description": "APIサービス情報を入力し、接続テストに合格して申請してください",
-    "loading": "フォーム設定を読み込み中...",
-    "metaErrorHint": "この機能はまだ有効になっていない可能性があります。管理者にお問い合わせください。",
-    "next": "次へ", "back": "戻る",
-    "providerInfo": {
-      "title": "プロバイダー情報",
-      "agreementText": "以下に同意します：", "agreementLink": "掲載規約",
-      "providerName": "プロバイダー名", "providerNamePlaceholder": "例：MyService",
-      "websiteUrl": "ウェブサイトURL", "category": "カテゴリ",
-      "categories": { "commercial": "商用", "public": "公共" },
-      "serviceType": "サービスタイプ", "serviceTypes": { "cc": "CC", "cx": "CX", "gm": "GM" },
-      "identity": "ユーザー種別",
-      "identities": {
-        "publicOwner": "公益サイトオーナー",
-        "publicOwnerDesc": "テストや研究のための公益サイトを申請、無料で参加",
-        "commercialOwner": "商用サイトオーナー",
-        "commercialOwnerDesc": "商用サイトを申請し、プラットフォームを通じて集客",
-        "personal": "個人ユーザー",
-        "personalDesc": "優秀なリレーサイトを推薦し、アフィリエイトリンクで報酬を獲得"
-      },
-      "sponsorLevel": "スポンサーレベル",
-      "sponsorLevels": {
-        "public": "パブリック",
-        "signal": "シグナル",
-        "pulse": "パルス"
-      },
-      "channelType": "チャネルタイプ",
-      "channelTypes": {
-        "O": "公式",
-        "ODesc": "サービス事業者が保有するアカウントプールを使い、上流の公式 API（Anthropic Console、Claude サブスクリプション、Bedrock など）に直接接続。第三者のリバースエンジニアリングは介在しません。",
-        "R": "リバース",
-        "RDesc": "ネイティブ対応ではなく、技術的手段（リバース Web セッションや第三者スクリプトなど）で適合させたチャネル。",
-        "M": "混合",
-        "MDesc": "上記両方の併用、または公式と第三者バックアッププールの組み合わせ（公式メイン + リバースバックアップなど）。"
-      },
-      "channelSource": "チャネルソース", "customSource": "カスタム...", "customSourcePlaceholder": "カスタムソースを入力",
-      "channelSourceCustomPlaceholder": "ソース名を入力（大文字/数字）",
-      "channelCodePreview": "チャネルコードプレビュー",
-      "optional": "（任意）"
-    },
-    "connectionTest": {
-      "title": "接続テスト", "description": "API情報を入力してテストを実行してください",
-      "baseUrl": "APIベースURL", "baseUrlHint": "HTTPSが必須です",
-      "apiKey": "APIキー", "apiKeyPlaceholder": "APIキーを入力",
-      "apiKeyHint": "検証とモニタリングのみに使用、暗号化保存",
-      "showApiKey": "APIキーを表示", "hideApiKey": "APIキーを非表示",
-      "testType": "サービスタイプ", "testVariant": "リクエストテンプレート",
-      "variantHint": "テストに使用するモデルテンプレートを選択（モデルごとに認証ポリシーが異なる場合があります）",
-      "variants": { "cc-haiku-pro-2184": "Haiku Pro (2.1.84)" },
-      "runTest": "テスト実行", "testing": "テスト中...",
-      "resultTitle": "テスト結果", "probeStatus": "探査状態",
-      "latency": "遅延", "httpCode": "HTTPコード", "subStatus": "詳細状態", "error": "エラー",
-      "proofValid": "テスト証明有効（残り {{time}}）", "proofExpired": "テスト証明の期限切れ。再テストしてください"
-    },
-    "test": { "statusAvailable": "利用可能", "statusDegraded": "低下", "statusUnavailable": "利用不可", "statusUnknown": "不明" },
-    "confirm": {
-      "title": "確認・送信", "description": "以下の情報を確認して申請を送信してください",
-      "sectionProvider": "プロバイダー情報", "sectionConnection": "接続情報", "copy": "コピー",
-      "submit": "申請を送信", "submitting": "送信中...",
-      "successTitle": "申請が送信されました！", "successDescription": "速やかにレビューいたします",
-      "publicId": "申請番号", "publicIdHint": "この番号を保存して申請状況を確認してください",
-      "contactLabel": "レビュー連絡先",
-      "copyTemplateHint": "連絡テンプレートをコピー：",
-      "contactTemplate": "こんにちは、掲載申請を送信しました（番号：{{id}}、プロバイダー：{{provider}}）。ご確認をお願いします。",
-      "newSubmission": "新規申請"
-    }
-  },
-  "contact": {
-    "meta": {
-      "title": "お問い合わせ | Sakrylle Status",
-      "description": "掲載申請、変更リクエスト、フィードバックの送信"
-    },
-    "title": "お問い合わせ",
-    "description": "必要なサービスを選択してください",
-    "apply": {
-      "title": "掲載申請",
-      "description": "新しいAPIサービスをSakrylle Status監視プラットフォームに追加"
-    },
-    "change": {
-      "title": "変更リクエスト",
-      "description": "掲載済みチャネルの設定を変更（URL、APIキーなど）"
-    },
-    "feedback": {
-      "title": "フィードバック",
-      "description": "ご提案、バグ報告、その他のお問い合わせ"
-    },
-    "community": {
-      "title": "コミュニティ",
-      "description": "QQグループに参加して、他のユーザーと交流しましょう"
-    },
-    "discussions": {
-      "title": "ディスカッション",
-      "description": "GitHub Discussionsで質問・共有・議論"
-    }
-  },
-  "changeRequest": {
-    "meta": {
-      "title": "変更リクエスト | Sakrylle Status",
-      "description": "掲載済みチャネルの設定を変更"
-    },
-    "title": "変更リクエスト",
-    "subtitle": "APIキーで本人確認を行い、掲載済みチャネルの設定を変更します",
-    "steps": {
-      "auth": "認証",
-      "edit": "編集",
-      "test": "テスト",
-      "review": "確認"
-    },
-    "back": "戻る",
-    "next": "次へ",
-    "auth": {
-      "title": "本人確認",
-      "description": "掲載済みチャネルのAPIキーを入力してください。システムが対応するチャネルを自動的に検索します。",
-      "placeholder": "APIキーを入力",
-      "submit": "認証",
-      "invalidKey": "有効なAPIキーを入力してください（10文字以上）",
-      "authFailed": "APIキーの認証に失敗しました"
-    },
-    "edit": {
-      "title": "チャネル情報の編集",
-      "description": "チャネル {{channel}} の設定を変更します。空欄の場合は現在の値を維持します。",
-      "selectChannel": "チャネルを選択",
-      "multipleChannels": "APIキーが複数のチャネルに一致しました。変更するチャネルを選択してください。",
-      "current": "現在の値",
-      "noChange": "変更なし",
-      "newApiKeyPlaceholder": "APIキーを変更する場合は新しいキーを入力",
-      "noChanges": "少なくとも1つのフィールドを変更してください"
-    },
-    "fields": {
-      "providerName": "プロバイダー名",
-      "providerUrl": "ウェブサイトURL",
-      "channelName": "チャネル名",
-      "category": "カテゴリ",
-      "sponsorLevel": "スポンサーレベル",
-      "baseUrl": "APIベースURL",
-      "newApiKey": "新しいAPIキー"
-    },
-    "test": {
-      "title": "接続テスト",
-      "description": "監視関連のフィールドを変更しました。送信前に接続テストが必要です。",
-      "testType": "サービスタイプ",
-      "variant": "リクエストテンプレート",
-      "run": "テスト実行",
-      "running": "テスト中...",
-      "passed": "テスト合格",
-      "failed": "テスト不合格",
-      "latency": "レイテンシ",
-      "retry": "再テスト",
-      "requestFailed": "テストリクエストに失敗しました"
-    },
-    "review": {
-      "title": "変更の確認",
-      "description": "以下の変更内容を確認して送信してください",
-      "target": "対象チャネル",
-      "submit": "変更を送信",
-      "submitFailed": "送信に失敗しました"
-    },
-    "done": {
-      "title": "変更リクエストが送信されました",
-      "description": "リクエストが送信されました。進捗確認のため、以下の番号を保存してください。",
-      "newRequest": "新しいリクエストを送信"
-    }
   },
   "admin": {
     "meta": {

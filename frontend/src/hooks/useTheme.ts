@@ -9,7 +9,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
-export type ThemeId = 'default-dark' | 'night-dark' | 'light-cool' | 'light-warm';
+export type ThemeId = 'default-dark' | 'light-cool';
 
 export interface Theme {
   id: ThemeId;
@@ -19,13 +19,22 @@ export interface Theme {
 
 export const THEMES: Theme[] = [
   { id: 'default-dark', nameKey: 'theme.defaultDark', isDark: true },
-  { id: 'night-dark', nameKey: 'theme.nightDark', isDark: true },
   { id: 'light-cool', nameKey: 'theme.lightCool', isDark: false },
-  { id: 'light-warm', nameKey: 'theme.lightWarm', isDark: false },
 ];
 
 const STORAGE_KEY = 'relay-pulse-theme';
 const DEFAULT_THEME: ThemeId = 'default-dark';
+
+/**
+ * 旧主题 ID → 新主题 ID 的迁移映射
+ *
+ * 历史上支持 night-dark / light-warm，现在精简为两套；
+ * 这里把 localStorage 里的旧值平滑地映射到新值。
+ */
+const LEGACY_THEME_MIGRATION: Record<string, ThemeId> = {
+  'night-dark': 'default-dark',
+  'light-warm': 'light-cool',
+};
 
 /**
  * 从 localStorage 获取保存的主题
@@ -35,8 +44,16 @@ function getStoredTheme(): ThemeId {
 
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored && THEMES.some((t) => t.id === stored)) {
+    if (!stored) return DEFAULT_THEME;
+
+    // 1) 当前合法主题 ID
+    if (THEMES.some((t) => t.id === stored)) {
       return stored as ThemeId;
+    }
+
+    // 2) 旧主题 ID 自动迁移到对应的新主题
+    if (stored in LEGACY_THEME_MIGRATION) {
+      return LEGACY_THEME_MIGRATION[stored];
     }
   } catch {
     // localStorage 不可用（隐私模式/安全策略）

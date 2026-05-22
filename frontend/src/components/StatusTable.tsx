@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo, memo } from 'react';
 import { createPortal } from 'react-dom';
 import { List, type RowComponentProps } from 'react-window';
-import { ArrowUpDown, ArrowUp, ArrowDown, Zap, Shield, Filter, Info } from 'lucide-react';
+import { ArrowUpDown, ArrowUp, ArrowDown, Zap, Shield, Filter } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { StatusDot } from './StatusDot';
 import { HeatmapBlock } from './HeatmapBlock';
@@ -14,9 +14,7 @@ import { getTimeRanges } from '../constants';
 import { availabilityToColor, latencyToColor, sponsorLevelToBorderClass, sponsorLevelToCardBorderColor, sponsorLevelToPinnedBgClass } from '../utils/color';
 import { aggregateHeatmap } from '../utils/heatmapAggregator';
 import { createMediaQueryEffect } from '../utils/mediaQuery';
-import { shortenModelName } from '../utils/modelName';
 import { hasAnyAnnotation, hasAnyAnnotationInList } from '../utils/annotationUtils';
-import { formatPriceRatioStructured } from '../utils/format';
 import { getServiceIconComponent } from './ServiceIcon';
 import type { ProcessedMonitorData, SortConfig } from '../types';
 
@@ -148,20 +146,7 @@ function ChannelCell({ channel, probeUrl, templateName, coldReason, className = 
 }
 
 // ─── 模型列辅助函数 ───────────────────────────────────────────
-
-function getModelDisplayList(modelEntries?: ProcessedMonitorData['modelEntries']): string[] {
-  if (!modelEntries || modelEntries.length === 0) return [];
-  return modelEntries
-    .map((entry) => shortenModelName(entry.requestModel) || entry.model || '-')
-    .filter(Boolean);
-}
-
-function getModelTooltip(modelEntries?: ProcessedMonitorData['modelEntries']): string | undefined {
-  if (!modelEntries || modelEntries.length === 0) return undefined;
-  return modelEntries
-    .map((entry) => entry.requestModel || entry.model || '-')
-    .join('\n');
-}
+// (removed: model column no longer rendered)
 
 interface StatusTableProps {
   data: ProcessedMonitorData[];
@@ -336,24 +321,6 @@ function MobileListItem({
                   className="text-muted truncate"
                 />
               )}
-              {item.modelEntries && item.modelEntries.length > 0 && (() => {
-                const models = getModelDisplayList(item.modelEntries);
-                if (models.length === 0) return null;
-                return (
-                  <span
-                    className="text-[10px] text-muted truncate max-w-[120px]"
-                    title={getModelTooltip(item.modelEntries)}
-                  >
-                    {models.length === 1 ? models[0] : `${models[0]} +${models.length - 1}`}
-                  </span>
-                );
-              })()}
-              {/* 收录时间 */}
-              {item.listedDays != null && (
-                <span className="text-[10px] text-muted font-mono flex-shrink-0">
-                  {item.listedDays}d
-                </span>
-              )}
             </div>
           </div>
         </div>
@@ -424,8 +391,6 @@ function MobileSortMenu({
     { key: 'uptime', label: t('table.sorting.uptime') },
     { key: 'lastCheck', label: t('table.sorting.lastCheck') },
     { key: 'serviceType', label: t('table.sorting.service') },
-    { key: 'priceRatio', label: t('table.sorting.priceRatio') },
-    { key: 'listedDays', label: t('table.sorting.listedDays') },
   ];
 
   return (
@@ -537,9 +502,6 @@ function StatusTableComponent({
           <col className="w-px" />
           <col className="w-px" />
           <col className="w-px" />
-          <col className="w-px" />
-          <col className="w-px" />
-          <col className="w-px" />
           <col className="w-full" />
         </colgroup>
         <thead>
@@ -584,49 +546,6 @@ function StatusTableComponent({
             >
               <div className="flex items-center">
                 {t('table.headers.channel')} <SortIcon columnKey="channel" />
-              </div>
-            </th>
-            <th className="px-2 py-3 font-medium whitespace-nowrap">
-              {t('table.headers.model')}
-            </th>
-            <th
-              className="px-2 py-3 font-medium whitespace-nowrap cursor-pointer hover:text-accent transition-colors focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:outline-none"
-              onClick={() => onSort('priceRatio')}
-              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onSort('priceRatio'))}
-              tabIndex={0}
-              role="button"
-            >
-              <div className="flex items-center">
-                <div className="flex flex-col leading-tight">
-                  <span>{t('table.headers.priceRatioLine1')}</span>
-                  <span className="text-[10px] opacity-50 font-normal">{t('table.headers.priceRatioLine2')}</span>
-                </div>
-                <span
-                  className="relative group/price-tip ml-1 inline-flex items-center cursor-help"
-                  onClick={(e) => e.stopPropagation()}
-                  onKeyDown={(e) => e.stopPropagation()}
-                >
-                  <Info size={12} className="text-secondary opacity-70" aria-hidden="true" />
-                  <span className="absolute left-1/2 top-full z-50 mt-1 w-48 -translate-x-1/2 rounded-lg border border-default bg-elevated px-2 py-1.5 text-[11px] font-normal normal-case tracking-normal leading-snug whitespace-normal text-primary opacity-0 pointer-events-none shadow-lg transition-opacity delay-150 group-hover/price-tip:opacity-100 group-hover/price-tip:pointer-events-auto">
-                    {t('table.headers.priceRatioTooltip')}
-                  </span>
-                </span>
-                <SortIcon columnKey="priceRatio" />
-              </div>
-            </th>
-            <th
-              className="px-2 py-3 font-medium whitespace-nowrap cursor-pointer hover:text-accent transition-colors focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:outline-none"
-              onClick={() => onSort('listedDays')}
-              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onSort('listedDays'))}
-              tabIndex={0}
-              role="button"
-            >
-              <div className="flex items-center">
-                <div className="flex flex-col leading-tight">
-                  <span>{t('table.headers.listedDaysLine1')}</span>
-                  <span className="text-[10px] opacity-50 font-normal">{t('table.headers.listedDaysLine2')}</span>
-                </div>
-                <SortIcon columnKey="listedDays" />
               </div>
             </th>
             <th
@@ -757,43 +676,6 @@ function StatusTableComponent({
                   coldReason={item.coldReason}
                   className="max-w-[10rem]"
                 />
-              </td>
-              <td className="px-2 py-1 text-secondary text-xs max-w-[14rem]">
-                {(() => {
-                  const models = getModelDisplayList(item.modelEntries);
-                  if (models.length === 0) return <span className="text-muted">-</span>;
-                  if (models.length === 1) {
-                    return (
-                      <span className="block truncate" title={getModelTooltip(item.modelEntries)}>
-                        {models[0]}
-                      </span>
-                    );
-                  }
-                  return (
-                    <div className="flex flex-col gap-0.5" title={getModelTooltip(item.modelEntries)}>
-                      {models.map((m, i) => (
-                        <span key={i} className="block truncate">{m}</span>
-                      ))}
-                    </div>
-                  );
-                })()}
-              </td>
-              <td className="px-2 py-1 font-mono text-xs whitespace-nowrap">
-                {(() => {
-                  const priceData = formatPriceRatioStructured(item.priceMin, item.priceMax);
-                  if (!priceData) return <span className="text-muted">-</span>;
-                  return (
-                    <div className="flex flex-col leading-tight">
-                      <span className="text-secondary">{priceData.base}</span>
-                      {priceData.sub && (
-                        <span className="text-[10px] text-muted">{priceData.sub}</span>
-                      )}
-                    </div>
-                  );
-                })()}
-              </td>
-              <td className="px-2 py-1 font-mono text-xs text-secondary whitespace-nowrap">
-                {item.listedDays != null ? `${item.listedDays}d` : '-'}
               </td>
               <td className="px-2 py-1 font-mono font-bold whitespace-nowrap">
                 <span style={{ color: availabilityToColor(item.uptime) }}>

@@ -1,17 +1,13 @@
 /**
- * RelayPulse 主题系统入口
+ * Sakrylle Status 主题系统入口
  *
- * 四套主题：
- * - default-dark: 默认暗色（现有）
- * - night-dark: 护眼暖暗
+ * 两套主题：
+ * - default-dark: 默认暗色
  * - light-cool: 冷灰亮色
- * - light-warm: 暖灰亮色
  */
 
 @import './default-dark.css';
-@import './night-dark.css';
 @import './light-cool.css';
-@import './light-warm.css';
 
 /* 语义化工具类 */
 @layer utilities {

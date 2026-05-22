@@ -1,12 +1,9 @@
 import { useState } from 'react';
-import { Activity, CheckCircle, AlertTriangle, Sparkles, Share2, Filter } from 'lucide-react';
+import { CheckCircle, AlertTriangle, Filter } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 import { SUPPORTED_LANGUAGES, LANGUAGE_PATH_MAP, LANGUAGE_NAMES, isSupportedLanguage, type SupportedLanguage } from '../i18n';
-import { FlagIcon } from './FlagIcon';
-import { useToast } from './Toast';
-import { shareCurrentPage } from '../utils/share';
 import { ThemeSwitcher } from './ThemeSwitcher';
 import { RefreshButton } from './RefreshButton';
 
@@ -26,11 +23,18 @@ interface HeaderProps {
   activeFiltersCount?: number;
 }
 
+// 语言缩写映射（用于切换器显示）
+const LANG_SHORT: Record<SupportedLanguage, string> = {
+  'zh-CN': 'ZH',
+  'en-US': 'EN',
+  'ru-RU': 'RU',
+  'ja-JP': 'JA',
+};
+
 export function Header({ stats, onFilterClick, onRefresh, loading, refreshCooldown, autoRefresh = true, onToggleAutoRefresh, activeFiltersCount = 0 }: HeaderProps) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
-  const { showToast } = useToast();
 
   // 语言下拉菜单状态
   const [showMobileLangMenu, setShowMobileLangMenu] = useState(false);
@@ -38,23 +42,6 @@ export function Header({ stats, onFilterClick, onRefresh, loading, refreshCooldo
 
   // 获取当前语言，使用类型守卫确保类型安全
   const currentLang: SupportedLanguage = isSupportedLanguage(i18n.language) ? i18n.language : 'zh-CN';
-
-  // 处理分享按钮点击
-  const handleShare = async () => {
-    const result = await shareCurrentPage();
-    if (result.method === 'cancelled') {
-      // 用户取消分享，静默处理
-      return;
-    }
-    if (result.success) {
-      if (result.method === 'copy') {
-        showToast(t('share.linkCopied'), 'success');
-      }
-      // Web Share API 成功时不需要提示，系统会处理
-    } else {
-      showToast(t('share.copyFailed'), 'error');
-    }
-  };
 
   /**
    * 处理语言切换
@@ -105,7 +92,7 @@ export function Header({ stats, onFilterClick, onRefresh, loading, refreshCooldo
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 lg:gap-3">
             <div className="p-1.5 lg:p-2 bg-accent/10 rounded-lg border border-accent/20 flex-shrink-0 animate-heartbeat">
-              <Activity className="w-5 h-5 lg:w-6 lg:h-6 text-accent" />
+              <img src="/logo.png" alt="Sakrylle" className="w-5 h-5 lg:w-6 lg:h-6 object-contain" />
             </div>
             <div>
               <h1 className="text-2xl lg:text-3xl font-bold text-gradient-hero">
@@ -129,11 +116,11 @@ export function Header({ stats, onFilterClick, onRefresh, loading, refreshCooldo
           <div className="relative">
             <button
               onClick={() => setShowMobileLangMenu(!showMobileLangMenu)}
-              className="p-2 rounded-lg bg-elevated/50 hover:bg-muted/50 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:outline-none"
+              className="px-2 py-2 rounded-lg bg-elevated/50 hover:bg-muted/50 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:outline-none text-xs font-semibold tracking-wide text-secondary"
               aria-label={t('accessibility.changeLanguage')}
               aria-expanded={showMobileLangMenu}
             >
-              <FlagIcon language={currentLang} className="w-5 h-auto" />
+              {LANG_SHORT[currentLang]}
             </button>
             {/* 下拉菜单 */}
             {showMobileLangMenu && (
@@ -155,14 +142,14 @@ export function Header({ stats, onFilterClick, onRefresh, loading, refreshCooldo
                         handleLanguageChange(lang);
                         setShowMobileLangMenu(false);
                       }}
-                      className={`w-full p-2 flex items-center justify-center hover:bg-muted/50 transition-colors first:rounded-t-lg last:rounded-b-lg focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:outline-none ${
-                        currentLang === lang ? 'bg-accent/20' : ''
+                      className={`w-full px-3 py-2 flex items-center justify-center hover:bg-muted/50 transition-colors first:rounded-t-lg last:rounded-b-lg focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:outline-none text-xs font-semibold tracking-wide ${
+                        currentLang === lang ? 'bg-accent/20 text-accent' : 'text-secondary'
                       }`}
                       role="option"
                       aria-selected={currentLang === lang}
                       aria-label={LANGUAGE_NAMES[lang]?.native || lang}
                     >
-                      <FlagIcon language={lang} className="w-5 h-auto flex-shrink-0" />
+                      {LANG_SHORT[lang]}
                     </button>
                   ))}
                 </div>
@@ -188,7 +175,7 @@ export function Header({ stats, onFilterClick, onRefresh, loading, refreshCooldo
           </div>
         </div>
 
-        {/* 桌面端：右侧完整操作区（语言 + 主题 + 分享 + 推荐 + 统计卡片） */}
+        {/* 桌面端：右侧完整操作区（语言 + 主题 + 统计卡片） */}
         <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
           {/* 语言切换器 - 点击/键盘展开 */}
           <div className="relative inline-block">
@@ -197,12 +184,12 @@ export function Header({ stats, onFilterClick, onRefresh, loading, refreshCooldo
               onKeyDown={(e) => {
                 if (e.key === 'Escape') setShowDesktopLangMenu(false);
               }}
-              className="p-2 rounded-lg bg-elevated/50 hover:bg-muted/50 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:outline-none"
+              className="px-2 py-2 rounded-lg bg-elevated/50 hover:bg-muted/50 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:outline-none text-xs font-semibold tracking-wide text-secondary"
               aria-label={t('accessibility.changeLanguage')}
               aria-expanded={showDesktopLangMenu}
               aria-haspopup="listbox"
             >
-              <FlagIcon language={currentLang} className="w-5 h-auto" />
+              {LANG_SHORT[currentLang]}
             </button>
             {showDesktopLangMenu && (
               <>
@@ -223,14 +210,14 @@ export function Header({ stats, onFilterClick, onRefresh, loading, refreshCooldo
                         handleLanguageChange(lang);
                         setShowDesktopLangMenu(false);
                       }}
-                      className={`w-full p-2 flex items-center justify-center hover:bg-muted/50 transition-colors first:rounded-t-lg last:rounded-b-lg focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:outline-none ${
-                        currentLang === lang ? 'bg-accent/20' : ''
+                      className={`w-full px-3 py-2 flex items-center justify-center hover:bg-muted/50 transition-colors first:rounded-t-lg last:rounded-b-lg focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:outline-none text-xs font-semibold tracking-wide ${
+                        currentLang === lang ? 'bg-accent/20 text-accent' : 'text-secondary'
                       }`}
                       role="option"
                       aria-selected={currentLang === lang}
                       aria-label={LANGUAGE_NAMES[lang]?.native || lang}
                     >
-                      <FlagIcon language={lang} className="w-5 h-auto flex-shrink-0" />
+                      {LANG_SHORT[lang]}
                     </button>
                   ))}
                 </div>
@@ -240,28 +227,6 @@ export function Header({ stats, onFilterClick, onRefresh, loading, refreshCooldo
 
           {/* 主题切换器 */}
           <ThemeSwitcher />
-
-          {/* 分享按钮 */}
-          <button
-            onClick={handleShare}
-            className="p-2 rounded-lg bg-elevated/50 text-secondary hover:text-primary hover:bg-muted/50 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:outline-none"
-            aria-label={t('share.share')}
-            title={t('share.share')}
-          >
-            <Share2 size={16} />
-          </button>
-
-          {/* 联系我们按钮 → 联系页面 */}
-          <button
-            onClick={() => {
-              const langPath = LANGUAGE_PATH_MAP[currentLang];
-              navigate(langPath ? `/${langPath}/contact` : '/contact');
-            }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-accent/40 bg-accent/10 text-accent font-semibold tracking-wide shadow-accent hover:bg-accent/20 transition focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:outline-none"
-          >
-            <Sparkles size={14} />
-            {t('header.contactBtn')}
-          </button>
 
           {/* 统计卡片 - 紧凑单行 */}
           <div className="flex gap-2">
@@ -279,7 +244,7 @@ export function Header({ stats, onFilterClick, onRefresh, loading, refreshCooldo
         </div>
       </div>
 
-      {/* 移动端：筛选/刷新 + 推荐按钮（960px 以下显示） */}
+      {/* 移动端：筛选/刷新按钮（960px 以下显示） */}
       <div className="flex items-center gap-1.5 min-[960px]:hidden">
         {/* 移动端：筛选按钮 */}
         {onFilterClick && (
@@ -307,31 +272,8 @@ export function Header({ stats, onFilterClick, onRefresh, loading, refreshCooldo
             onRefresh={onRefresh}
             onToggleAutoRefresh={onToggleAutoRefresh}
             size="sm"
-            showToggle={false}
           />
         )}
-
-        {/* 分享按钮 - 移动端 */}
-        <button
-          onClick={handleShare}
-          className="flex items-center gap-1 px-2 py-1 rounded-lg bg-elevated/50 text-secondary hover:text-primary hover:bg-muted/50 transition-all duration-200 text-xs ml-auto focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:outline-none"
-          aria-label={t('share.share')}
-        >
-          <Share2 size={12} />
-          {t('share.shareShort')}
-        </button>
-
-        {/* 联系我们按钮 - 移动端紧凑版 */}
-        <button
-          onClick={() => {
-            const langPath = LANGUAGE_PATH_MAP[currentLang];
-            navigate(langPath ? `/${langPath}/contact` : '/contact');
-          }}
-          className="flex items-center gap-1 px-2 py-1 rounded-lg border border-accent/40 bg-accent/10 text-accent text-xs font-medium shadow-accent hover:bg-accent/20 transition whitespace-nowrap focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:outline-none"
-        >
-          <Sparkles size={12} />
-          {t('header.contactBtnShort')}
-        </button>
       </div>
     </header>
   );
