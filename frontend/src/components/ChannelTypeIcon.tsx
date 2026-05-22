@@ -2,16 +2,15 @@ import { useTranslation } from 'react-i18next';
 
 export type ChannelType = 'official' | 'reverse' | 'mixed' | 'unknown';
 
-/** Parse O-/R-/M- prefix from channel identifier. Returns 'unknown' for unrecognized formats. */
+/** Parse O-/R-/M- prefix from channel identifier. Returns null for channels that don't use the prefix scheme (e.g. our own Sakrylle channels), so no "unknown" indicator is rendered. */
 export function parseChannelType(channel?: string | null): ChannelType | null {
   if (!channel) return null;
+  if (channel.charAt(1) !== '-') return null;
   const prefix = channel.charAt(0).toUpperCase();
-  if (channel.charAt(1) === '-') {
-    if (prefix === 'O') return 'official';
-    if (prefix === 'R') return 'reverse';
-    if (prefix === 'M') return 'mixed';
-  }
-  return 'unknown';
+  if (prefix === 'O') return 'official';
+  if (prefix === 'R') return 'reverse';
+  if (prefix === 'M') return 'mixed';
+  return null;
 }
 
 // Solid five-pointed star (official/certified)
