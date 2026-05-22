@@ -47,9 +47,9 @@
   --blue: 217 80% 50%;
   --blue-muted: 217 70% 55%;
 
-  /* 渐变 */
-  --gradient-hero: linear-gradient(135deg, hsl(192 80% 42%), hsl(217 80% 50%));
-  --gradient-button: linear-gradient(to bottom right, hsl(192 80% 42%), hsl(217 80% 50%));
+  /* 渐变（冷调紫罗兰 → 雾蓝） */
+  --gradient-hero: linear-gradient(135deg, hsl(256 38% 56%), hsl(217 50% 55%));
+  --gradient-button: linear-gradient(to bottom right, hsl(256 38% 56%), hsl(256 42% 48%));
 
   /* 发光效果 - 亮色主题降低透明度 */
   --glow-success: 144 55% 36% / 0.4;

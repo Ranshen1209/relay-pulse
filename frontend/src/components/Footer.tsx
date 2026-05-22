@@ -68,7 +68,7 @@ export function Footer() {
       <div className={`${expanded ? 'mt-4 pt-4' : 'mt-2 pt-2 sm:mt-4 sm:pt-4'} border-t border-default/50 flex flex-col sm:flex-row items-center justify-center gap-2 text-xs`}>
         <div className="flex items-center gap-2 flex-wrap justify-center">
           <a
-            href="https://github.com/prehisle/relay-pulse"
+            href="https://github.com/Ranshen1209/relay-pulse"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-elevated/50 text-secondary hover:text-accent hover:bg-muted/50 transition min-h-[36px]"

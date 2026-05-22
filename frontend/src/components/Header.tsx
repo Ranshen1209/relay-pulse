@@ -109,7 +109,7 @@ export function Header({ stats, onFilterClick, onRefresh, loading, refreshCooldo
             </div>
             <div>
               <h1 className="text-2xl lg:text-3xl font-bold text-gradient-hero">
-                RelayPulse
+                {t('header.brand')}
               </h1>
               {/* 桌面端 Tagline - 作为副标题 */}
               <p className="hidden lg:block text-secondary text-xs mt-0.5">

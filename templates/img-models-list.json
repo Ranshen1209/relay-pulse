@@ -1,0 +1,18 @@
+{
+  "model": "Image",
+  "request_model": "gpt-image-2",
+  "url": "{{BASE_URL}}/v1/models",
+  "method": "GET",
+  "headers": {
+    "Authorization": "Bearer {{API_KEY}}",
+    "User-Agent": "sakrylle-status/1.0"
+  },
+  "response": {
+    "success_contains": "gpt-image-2"
+  },
+  "probe": {
+    "slow_latency": "5s",
+    "timeout": "10s",
+    "retry": 0
+  }
+}

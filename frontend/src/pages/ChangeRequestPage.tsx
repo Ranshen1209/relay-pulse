@@ -504,7 +504,7 @@ export default function ChangeRequestPage() {
             >
               <Activity className="w-5 h-5 text-accent" />
             </button>
-            <span className="text-lg font-bold text-gradient-hero">RelayPulse</span>
+            <span className="text-lg font-bold text-gradient-hero">Sakrylle Status</span>
           </div>
         </header>
 

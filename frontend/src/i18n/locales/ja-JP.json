@@ -1,7 +1,7 @@
 {
   "meta": {
-    "title": "RelayPulse - API中継サービスの可用性マトリクスをリアルタイム監視",
-    "description": "RelayPulse - 世界中のLLM中継サービスの可用性・レイテンシ・スポンサー経路をリアルタイムで監視。開発者がプロバイダの品質を素早く評価し、最も安定したAPIプロバイダを見つけられるよう支援します。Claude や GPT など主要モデルの接続性チェックに対応。"
+    "title": "Sakrylle Status - API中継サービスの可用性マトリクスをリアルタイム監視",
+    "description": "Sakrylle Status - 世界中のLLM中継サービスの可用性・レイテンシ・スポンサー経路をリアルタイムで監視。開発者がプロバイダの品質を素早く評価し、最も安定したAPIプロバイダを見つけられるよう支援します。Claude や GPT など主要モデルの接続性チェックに対応。"
   },
   "common": {
     "loading": "データノードを同期しています...",
@@ -41,7 +41,8 @@
     }
   },
   "header": {
-    "tagline": "API中継サービスの可用性マトリクスをリアルタイム監視",
+    "brand": "Sakrylle Status",
+    "tagline": "Sakrylle API のサービス可用性モニタ",
     "contactBtn": "お問い合わせ",
     "contactBtnShort": "問合せ",
     "stats": {
@@ -286,7 +287,7 @@
     "copyFailed": "コピーに失敗しました。リンクを手動でコピーしてください"
   },
   "externalLink": {
-    "title": "RelayPulse を離れます",
+    "title": "Sakrylle Status を離れます",
     "target": "移動先",
     "thirdPartyNotice": "訪問しようとしているサービスプロバイダーは、第三者によって独立して運営されています。",
     "riskTip1": "当サイトの監視データは技術的な接続性のみを表しており、事業者の信頼性や資金の安全性を保証するものではありません。",
@@ -327,7 +328,7 @@
     "moreAnnouncements": "他 {{count}} 件のお知らせ"
   },
   "onboarding": {
-    "meta": { "title": "掲載申請", "description": "APIサービスをRelayPulseモニタリングプラットフォームに登録" },
+    "meta": { "title": "掲載申請", "description": "APIサービスをSakrylle Statusモニタリングプラットフォームに登録" },
     "title": "掲載申請",
     "description": "APIサービス情報を入力し、接続テストに合格して申請してください",
     "loading": "フォーム設定を読み込み中...",
@@ -398,14 +399,14 @@
   },
   "contact": {
     "meta": {
-      "title": "お問い合わせ | RelayPulse",
+      "title": "お問い合わせ | Sakrylle Status",
       "description": "掲載申請、変更リクエスト、フィードバックの送信"
     },
     "title": "お問い合わせ",
     "description": "必要なサービスを選択してください",
     "apply": {
       "title": "掲載申請",
-      "description": "新しいAPIサービスをRelayPulse監視プラットフォームに追加"
+      "description": "新しいAPIサービスをSakrylle Status監視プラットフォームに追加"
     },
     "change": {
       "title": "変更リクエスト",
@@ -426,7 +427,7 @@
   },
   "changeRequest": {
     "meta": {
-      "title": "変更リクエスト | RelayPulse",
+      "title": "変更リクエスト | Sakrylle Status",
       "description": "掲載済みチャネルの設定を変更"
     },
     "title": "変更リクエスト",
