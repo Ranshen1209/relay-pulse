@@ -8,7 +8,7 @@
 # All keys are scoped to one Sakrylle group each (api_keys.group_id is
 # single-valued in sub2api), so we need 4 separate keys.
 
-interval: 2m          # default cadence — overridden per-monitor when needed
+interval: 30m         # default cadence — overridden per-monitor when needed
 slow_latency: 8s
 
 storage:
@@ -17,7 +17,7 @@ storage:
     path: /data/monitor.db
 
 monitors:
-  # --- Claude-Kiro: claude-haiku-4-5 cheap probe (~$0.0001/probe) ---
+  # --- Claude-Kiro: claude-haiku-4-5 cheap probe, 30m cadence ---
   - provider: sakrylle
     provider_name: Sakrylle API
     provider_url: https://sub.sakrylle.com
@@ -34,7 +34,7 @@ monitors:
     template: cc-haiku-arith
     env_var_name: MONITOR_SAKRYLLE_CLAUDE_KIRO_API_KEY
 
-  # --- GPT-Pro: gpt-5.4-mini cheap probe (~$0.0001/probe) ---
+  # --- GPT-Pro: gpt-5.4-mini cheap probe, 30m cadence ---
   - provider: sakrylle
     provider_name: Sakrylle API
     provider_url: https://sub.sakrylle.com
@@ -51,7 +51,7 @@ monitors:
     template: cx-gpt-mini-chat
     env_var_name: MONITOR_SAKRYLLE_GPT_PRO_API_KEY
 
-  # --- GPT-Plus: same upstream as GPT-Pro at deeper discount ---
+  # --- GPT-Plus: same upstream as GPT-Pro at deeper discount, 30m cadence ---
   - provider: sakrylle
     provider_name: Sakrylle API
     provider_url: https://sub.sakrylle.com
@@ -68,7 +68,7 @@ monitors:
     template: cx-gpt-mini-chat
     env_var_name: MONITOR_SAKRYLLE_GPT_PLUS_API_KEY
 
-  # --- GPT-Image: hourly auth-only ping (no $0.15/probe charge) ---
+  # --- GPT-Image: 90m auth-only ping (no $0.15/probe charge) ---
   # /v1/models requires an authenticated key — confirms group is reachable
   # AND that gpt-image-2 is exposed to the key's group. Cheaper than firing
   # a real generations request.
@@ -86,5 +86,5 @@ monitors:
     channel_name: GPT-Image
     base_url: https://api.sakrylle.com
     template: img-models-list
-    interval: 1h
+    interval: 90m
     env_var_name: MONITOR_SAKRYLLE_GPT_IMAGE_API_KEY
