@@ -37,7 +37,9 @@ monitors:
     channel: claude-kiro
     channel_name: Claude-Kiro
     base_url: https://api.sakrylle.com
-    template: cc-haiku-arith
+    template: cc-haiku-openai-chat
+    retry: 3
+    timeout: 30s
     env_var_name: MONITOR_SAKRYLLE_CLAUDE_KIRO_API_KEY
 
   # --- GPT-Pro: gpt-5.4-mini cheap probe ---
@@ -55,6 +57,8 @@ monitors:
     channel_name: GPT-Pro
     base_url: https://api.sakrylle.com
     template: cx-gpt-mini-chat
+    retry: 3
+    timeout: 30s
     env_var_name: MONITOR_SAKRYLLE_GPT_PRO_API_KEY
 
   # --- GPT-Plus: same upstream as GPT-Pro at deeper discount ---
@@ -72,4 +76,6 @@ monitors:
     channel_name: GPT-Plus
     base_url: https://api.sakrylle.com
     template: cx-gpt-mini-chat
+    retry: 3
+    timeout: 30s
     env_var_name: MONITOR_SAKRYLLE_GPT_PLUS_API_KEY
