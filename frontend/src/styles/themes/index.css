@@ -141,6 +141,9 @@
   .bg-service-gm { background-color: hsl(var(--service-gm) / 0.1); }
   .text-service-gm { color: hsl(var(--service-gm)); }
   .border-service-gm { border-color: hsl(var(--service-gm) / 0.3); }
+  .bg-service-dx { background-color: hsl(var(--service-dx) / 0.1); }
+  .text-service-dx { color: hsl(var(--service-dx)); }
+  .border-service-dx { border-color: hsl(var(--service-dx) / 0.3); }
 
   /* 渐变 */
   .bg-gradient-hero { background: var(--gradient-hero); }

@@ -41,8 +41,9 @@
 
   /* 服务类型色 */
   --service-cc: 15 63% 60%;           /* Claude 橙色 #D97757 */
-  --service-cx: 210 40% 80%;          /* 柔和白，降低刺眼感 */
+  --service-cx: 163 65% 55%;          /* OpenAI 绿 #10A37F（暗色主题略提亮） */
   --service-gm: 215 100% 60%;         /* Gemini 蓝色 #3186FF */
+  --service-dx: 228 99% 72%;          /* DeepSeek 蓝 #4D6BFE（暗色主题略提亮） */
 
   /* 辅助色 */
   --blue: 217 91% 60%;              /* blue-500 */

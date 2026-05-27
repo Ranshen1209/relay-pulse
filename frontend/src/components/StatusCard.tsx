@@ -122,6 +122,8 @@ function StatusCardComponent({
                     ? 'border-service-cc text-service-cc bg-service-cc'
                     : item.serviceType === 'gm'
                     ? 'border-service-gm text-service-gm bg-service-gm'
+                    : item.serviceType === 'dx'
+                    ? 'border-service-dx text-service-dx bg-service-dx'
                     : 'border-service-cx text-service-cx bg-service-cx'
                 }`}
               >
