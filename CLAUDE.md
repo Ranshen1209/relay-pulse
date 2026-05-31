@@ -53,7 +53,7 @@ ssh ssh-tokyo 'docker logs --tail=20 relay-pulse 2>&1 | grep -i reload'
 
 ## Monitors（生产）
 
-7 个探针，全部 `interval: 3m`，全部打 `https://api.sakrylle.com`，**每个 group 一把独立 API key**（sub2api `api_keys.group_id` 是单值）。
+8 个探针，全部 `interval: 3m`，全部打 `https://api.sakrylle.com`，**每个 group 一把独立 API key**（sub2api `api_keys.group_id` 是单值）。
 
 | Channel key | Service | Template | Model | Group |
 |---|---|---|---|---|
@@ -62,10 +62,11 @@ ssh ssh-tokyo 'docker logs --tail=20 relay-pulse 2>&1 | grep -i reload'
 | `claude-special` | `cc` | `cc-haiku-openai-chat` | `claude-haiku-4-5-20251001` | Claude-Special |
 | `gpt-pro` | `cx` | `cx-gpt-mini-chat` | `gpt-5.4-mini` | GPT-Pro (id 3) |
 | `gpt-plus` | `cx` | `cx-gpt-mini-chat` | `gpt-5.4-mini` | GPT-Plus (id 4) |
+| `gpt-plus-special` | `cx` | `cx-gpt-mini-chat` | `gpt-5.4-mini` | GPT-Plus-Special (@0.15x) |
 | `deepseek` | `dx` | `dx-flash-openai-chat` | `deepseek-v4-flash` | Deepseek (id 6, 转售) |
 | `deepseek-official` | `dx` | `dx-flash-openai-chat` | `deepseek-v4-flash` | Deepseek-Official (id 9, 官方直连) |
 
-合计成本 ~$0.017/天（已对账 sub2api `usage_logs`）。3m 节奏自 2026-05-26 收紧（原 9m）。
+合计成本 ~$0.017/天（7 探针时对账 sub2api `usage_logs`；`gpt-plus-special` 于 2026-05-29 加入后未重新对账，实际略高）。3m 节奏自 2026-05-26 收紧（原 9m）。
 
 ### Retry / timeout
 
