@@ -53,20 +53,26 @@ ssh ssh-tokyo 'docker logs --tail=20 relay-pulse 2>&1 | grep -i reload'
 
 ## Monitors（生产）
 
-8 个探针，全部 `interval: 3m`，全部打 `https://api.sakrylle.com`，**每个 group 一把独立 API key**（sub2api `api_keys.group_id` 是单值）。
+10 个探针，全部 `interval: 3m`，全部打 `https://api.sakrylle.com`，**每个 group 一把独立 API key**（sub2api `api_keys.group_id` 是单值）。
 
-| Channel key | Service | Template | Model | Group |
-|---|---|---|---|---|
-| `claude-kiro` | `cc` | `cc-haiku-openai-chat` (fork) | `claude-haiku-4-5-20251001` | Claude-Kiro (id 2) |
-| `claude-code` | `cc` | `cc-haiku-openai-chat` | `claude-haiku-4-5-20251001` | Claude-Code (id 7) |
-| `claude-special` | `cc` | `cc-haiku-openai-chat` | `claude-haiku-4-5-20251001` | Claude-Special |
-| `gpt-pro` | `cx` | `cx-gpt-mini-chat` | `gpt-5.4-mini` | GPT-Pro (id 3) |
-| `gpt-plus` | `cx` | `cx-gpt-mini-chat` | `gpt-5.4-mini` | GPT-Plus (id 4) |
-| `gpt-plus-special` | `cx` | `cx-gpt-mini-chat` | `gpt-5.4-mini` | GPT-Plus-Special (@0.15x) |
-| `deepseek` | `dx` | `dx-flash-openai-chat` | `deepseek-v4-flash` | Deepseek (id 6, 转售) |
-| `deepseek-official` | `dx` | `dx-flash-openai-chat` | `deepseek-v4-flash` | Deepseek-Official (id 9, 官方直连) |
+| Channel key | Service | Template | Model | Group (sub2api) | Rate |
+|---|---|---|---|---|---|
+| `claude-kiro` | `cc` | `cc-haiku-openai-chat` (fork) | `claude-haiku-4-5-20251001` | Claude-Kiro (id 2) | 0.5x |
+| `claude-code` | `cc` | `cc-haiku-openai-chat` | `claude-haiku-4-5-20251001` | Claude-Code (id 7) | 0.6x |
+| `claude-special` | `cc` | `cc-haiku-openai-chat` | `claude-haiku-4-5-20251001` | Claude-Special (id 8) | 0.25x |
+| `claude-code-awsq` | `cc` | `cc-haiku-openai-chat` | `claude-haiku-4-5-20251001` | Claude-Code-AWSQ (id 12) | 0.4x |
+| `gpt-pro` | `cx` | `cx-gpt-mini-chat` | `gpt-5.4-mini` | GPT-Pro (id 14, 号池) | 0.5x |
+| `gpt-pro-special` | `cx` | `cx-gpt-mini-chat` | `gpt-5.4-mini` | GPT-Pro-Special (id 3, 旧名 GPT-Pro) | 0.4x |
+| `gpt-plus` | `cx` | `cx-gpt-mini-chat` | `gpt-5.4-mini` | GPT-Plus (id 4) | 0.25x |
+| `gpt-plus-special` | `cx` | `cx-gpt-mini-chat` | `gpt-5.4-mini` | GPT-Plus-Special (id 10) | 0.2x |
+| `deepseek` | `dx` | `dx-flash-openai-chat` | `deepseek-v4-flash` | Deepseek (id 6, 阿里Token转售) | 0.7x |
+| `deepseek-official` | `dx` | `dx-flash-openai-chat` | `deepseek-v4-flash` | Deepseek-Official (id 9, 官方直连) | 1.0x |
 
-合计成本 ~$0.017/天（7 探针时对账 sub2api `usage_logs`；`gpt-plus-special` 于 2026-05-29 加入后未重新对账，实际略高）。3m 节奏自 2026-05-26 收紧（原 9m）。
+不监测：GPT-Image (id 5)、GPT-Image-2-4K (id 11) — 按调用计费，探针成本过高。
+
+合计成本 ~$0.02/天（估算，基于 3m 节奏 + haiku/mini 单价）。3m 节奏自 2026-05-26 收紧（原 9m）。
+
+**2026-06-04 重大调整**：sub2api 后台将旧 GPT-Pro (id 3) 重命名为 GPT-Pro-Special，新上线 GPT-Pro (id 14) 号池。relay-pulse 同步调整：`gpt-pro` 历史数据迁移至 `gpt-pro-special`，新增 `gpt-pro` 和 `claude-code-awsq` 两个探针。
 
 ### Retry / timeout
 
