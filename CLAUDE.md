@@ -53,22 +53,19 @@ ssh ssh-tokyo 'docker logs --tail=20 relay-pulse 2>&1 | grep -i reload'
 
 ## Monitors（生产）
 
-10 个探针，全部 `interval: 3m`，全部打 `https://api.sakrylle.com`，**每个 group 一把独立 API key**（sub2api `api_keys.group_id` 是单值）。
+7 个探针，全部 `interval: 3m`，全部打 `https://api.sakrylle.com`，**每个 group 一把独立 API key**（sub2api `api_keys.group_id` 是单值）。
 
 | Channel key | Service | Template | Model | Group (sub2api) | Rate |
 |---|---|---|---|---|---|
 | `claude-kiro` | `cc` | `cc-haiku-openai-chat` (fork) | `claude-haiku-4-5-20251001` | Claude-Kiro (id 2) | 0.5x |
-| `claude-code` | `cc` | `cc-haiku-openai-chat` | `claude-haiku-4-5-20251001` | Claude-Code (id 7) | 0.6x |
-| `claude-special` | `cc` | `cc-haiku-openai-chat` | `claude-haiku-4-5-20251001` | Claude-Special (id 8) | 0.25x |
 | `claude-code-awsq` | `cc` | `cc-haiku-openai-chat` | `claude-haiku-4-5-20251001` | Claude-Code-AWSQ (id 12) | 0.4x |
 | `gpt-pro` | `cx` | `cx-gpt-mini-chat` | `gpt-5.4-mini` | GPT-Pro (id 14, 号池) | 0.5x |
 | `gpt-pro-special` | `cx` | `cx-gpt-mini-chat` | `gpt-5.4-mini` | GPT-Pro-Special (id 3, 旧名 GPT-Pro) | 0.4x |
 | `gpt-plus` | `cx` | `cx-gpt-mini-chat` | `gpt-5.4-mini` | GPT-Plus (id 4) | 0.25x |
-| `gpt-plus-special` | `cx` | `cx-gpt-mini-chat` | `gpt-5.4-mini` | GPT-Plus-Special (id 10) | 0.2x |
 | `deepseek` | `dx` | `dx-flash-openai-chat` | `deepseek-v4-flash` | Deepseek (id 6, 阿里Token转售) | 0.7x |
 | `deepseek-official` | `dx` | `dx-flash-openai-chat` | `deepseek-v4-flash` | Deepseek-Official (id 9, 官方直连) | 1.0x |
 
-不监测：GPT-Image (id 5)、GPT-Image-2-4K (id 11) — 按调用计费，探针成本过高。
+不监测：GPT-Image (id 5)、GPT-Image-2-4K (id 11) — 按调用计费，探针成本过高。Claude-Code (id 7)、Claude-Special (id 8)、GPT-Plus-Special (id 10) 已下架。
 
 合计成本 ~$0.02/天（估算，基于 3m 节奏 + haiku/mini 单价）。3m 节奏自 2026-05-26 收紧（原 9m）。
 
