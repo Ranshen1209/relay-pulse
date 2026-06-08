@@ -1,0 +1,30 @@
+---
+description: Sakrylle 主题定制与上游 rebase 冲突面
+globs: frontend/**,internal/api/meta.go,Dockerfile
+alwaysApply: false
+---
+
+# Sakrylle 主题定制（theme/sakrylle）
+
+每次 rebase `upstream/main` **必冲突**，解决后需重新应用定制：
+
+- **主题**: 4→2（`default-dark`、`light-cool`）；亮色 hue 256（Monet 薰衣草），原 210
+- **品牌**: "Sakrylle Status" — i18n `frontend/src/i18n/locales/{zh,en,ru,ja}.json` + Go SSR `internal/api/meta.go`
+- **Logo**: 樱花 SVG 替代 RP 文字
+- **语言切换**: ZH/EN/RU/JA 文字码，无国旗
+- **已删**（rebase 后会回来，需再删）: `ContactPage`、`OnboardingPage`、`ChangeRequestPage`、`Footer.tsx`、`useOnboarding`、`useChangeRequest`、`utils/share.ts`
+- **状态表**: 隐藏 Model/Price/Listed-days；`MOBILE_ROW_HEIGHT=200`；`HIDDEN_ANNOTATION_IDS` 过滤 frequency/public_service/key_type/sponsor_*
+- **Channel**: `parseChannelType` 无前缀返回 `null`（上游 `'unknown'`）
+- **主题迁移**: `useTheme.ts` 的 `LEGACY_THEME_MIGRATION`
+
+冲突常客: `i18n/locales/*.json`、`meta.go`、`styles/themes/*.css`、`Header/StatusTable/StatusCard/Footer/RefreshButton/ChannelTypeIcon.tsx`、`useTheme.ts`、`router.tsx`、`Dockerfile`。
+
+```bash
+git fetch upstream && git checkout theme/sakrylle && git rebase upstream/main
+# 重新删页面、修 hue、补品牌字符串
+make ci
+```
+
+## Embed 陷阱
+
+前端源码在 `frontend/`，Go embed 要 `internal/api/frontend/dist/`（gitignore）。用 `setup-dev.sh --rebuild-frontend` 同步，**别直接改** `internal/api/frontend/`。

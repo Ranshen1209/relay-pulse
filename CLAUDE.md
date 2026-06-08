@@ -2,10 +2,12 @@
 
 Sakrylle Status fork of [prehisle/relay-pulse](https://github.com/prehisle/relay-pulse). 仅运维笔记 — 上游架构/开发流程读 upstream `README.md`。"改了什么" 走 `git diff upstream/main`。
 
+Cursor 按场景规则见 `.cursor/rules/`（从本文件拆分）；完整手册仍以本文件为准。
+
 ## Repository
 
 - Upstream: [prehisle/relay-pulse](https://github.com/prehisle/relay-pulse)
-- Fork: [Ranshen1209/relay-pulse](https://github.com/Ranshen1209/relay-pulse), 分支 `theme/sakrylle`（所有定制都在这里）
+- Fork: [Ranshen1209/sakrylle-status](https://github.com/Ranshen1209/sakrylle-status), 分支 `theme/sakrylle`（所有定制都在这里）
 - Image: `ghcr.io/ranshen1209/relay-pulse:sakrylle`
 - 生产: `status.sakrylle.com`
 - 服务器: `cliproxyapi-jp` (64.83.47.108, SSH 别名 `ssh-tokyo`)，compose stack 在 `/opt/stack/`
@@ -18,7 +20,7 @@ Sakrylle API 网关（`Ranshen1209/sub2api`，分支 `theme/monet-purple`）的�
 
 ```bash
 git push origin theme/sakrylle
-gh run list -R Ranshen1209/relay-pulse --limit=1   # 等 ~3 分钟
+gh run list -R Ranshen1209/sakrylle-status --limit=1   # 等 ~3 分钟
 ssh ssh-tokyo 'cd /opt/stack && docker compose pull relay-pulse && docker compose up -d --force-recreate relay-pulse'
 curl -sI https://status.sakrylle.com/health
 ```

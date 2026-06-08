@@ -1,0 +1,52 @@
+---
+description: Sakrylle 生产运维命令、探针排障与本地开发
+alwaysApply: false
+---
+
+# 运维与本地开发
+
+## 常用命令
+
+```bash
+ssh ssh-tokyo 'cd /opt/stack && docker compose ps relay-pulse'
+ssh ssh-tokyo 'cd /opt/stack && docker compose logs --tail=100 relay-pulse'
+ssh ssh-tokyo 'cd /opt/stack && docker compose restart relay-pulse'
+ssh ssh-tokyo 'cd /opt/stack && docker compose pull relay-pulse && docker compose up -d --force-recreate relay-pulse'
+ssh ssh-tokyo 'docker exec relay-pulse sqlite3 /data/monitor.db "SELECT * FROM events ORDER BY id DESC LIMIT 10"'
+curl -sI https://status.sakrylle.com/health
+curl -s https://status.sakrylle.com/api/version | jq
+```
+
+## 红块排障
+
+```bash
+ssh ssh-tokyo 'docker logs --tail=200 relay-pulse 2>&1 | grep -E "claude-kiro-special|probe_id"'
+ssh ssh-tokyo 'docker exec sub2api-postgres psql -U sub2api -d sub2api -c \
+  "SELECT created_at, model_name, total_cost FROM usage_logs WHERE api_key_id=<id> ORDER BY id DESC LIMIT 5"'
+```
+
+日志 200 但 `usage_logs` 空 → 静默假阳性（见 monitors 规则 claude-kiro 节）。
+
+## API key 轮换
+
+1. sub2api 重置 `relay-pulse-<channel>`
+2. 改 `/opt/stack/relay-pulse/.env` 对应 `MONITOR_SAKRYLLE_<CHANNEL>_API_KEY`
+3. `docker compose up -d --force-recreate relay-pulse`
+4. 撤销旧 key（Redis 缓存 ≤60s）
+
+## 本地开发
+
+```bash
+./scripts/setup-dev.sh
+./scripts/setup-dev.sh --rebuild-frontend
+make dev
+cd frontend && npm run dev
+make ci
+go build -o /tmp/relay-pulse ./cmd/server && go vet ./...
+go run ./cmd/verify/main.go -provider Sakrylle -service cc -v
+```
+
+## Related
+
+- 网关: `Ranshen1209/sub2api`（`theme/monet-purple`），channel 映射见其 `CLAUDE.md`
+- Obsidian: `20 Work/ServerOps/Self-Hosted/Sub2API 部署.md`

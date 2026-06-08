@@ -162,7 +162,7 @@ export function Header({ stats, onFilterClick, onRefresh, loading, refreshCooldo
 
           {/* GitHub 链接 */}
           <a
-            href="https://github.com/Ranshen1209/relay-pulse"
+            href="https://github.com/Ranshen1209/sakrylle-status"
             target="_blank"
             rel="noopener noreferrer"
             className="p-2 rounded-lg bg-elevated/50 hover:bg-muted/50 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:outline-none"
@@ -242,7 +242,7 @@ export function Header({ stats, onFilterClick, onRefresh, loading, refreshCooldo
 
           {/* GitHub 链接 */}
           <a
-            href="https://github.com/Ranshen1209/relay-pulse"
+            href="https://github.com/Ranshen1209/sakrylle-status"
             target="_blank"
             rel="noopener noreferrer"
             className="p-2 rounded-lg bg-elevated/50 hover:bg-muted/50 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:outline-none"
