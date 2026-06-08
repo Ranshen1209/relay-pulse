@@ -57,7 +57,7 @@ ssh ssh-tokyo 'docker logs --tail=20 relay-pulse 2>&1 | grep -i reload'
 
 | Channel key | Service | Template | Model | Group (sub2api) | Rate |
 |---|---|---|---|---|---|
-| `claude-kiro` | `cc` | `cc-haiku-openai-chat` (fork) | `claude-haiku-4-5-20251001` | Claude-Kiro (id 2) | 0.5x |
+| `claude-kiro-special` | `cc` | `cc-haiku-openai-chat` (fork) | `claude-haiku-4-5-20251001` | Claude-Kiro-Special (id 2) | 0.5x |
 | `claude-code-awsq` | `cc` | `cc-haiku-openai-chat` | `claude-haiku-4-5-20251001` | Claude-Code-AWSQ (id 12) | 0.4x |
 | `gpt-pro` | `cx` | `cx-gpt-mini-chat` | `gpt-5.4-mini` | GPT-Pro (id 14, 号池) | 0.5x |
 | `gpt-pro-special` | `cx` | `cx-gpt-mini-chat` | `gpt-5.4-mini` | GPT-Pro-Special (id 3, 旧名 GPT-Pro) | 0.4x |
@@ -89,7 +89,7 @@ key 在 sub2api 后台建，命名 `relay-pulse-{channel}`，绑定对应 group�
 
 ## 已踩过的坑
 
-### claude-kiro 必须用 OpenAI-compat 模板，不能用原生 cc-haiku-arith
+### claude-kiro-special 必须用 OpenAI-compat 模板，不能用原生 cc-haiku-arith
 
 上游 `cc-haiku-arith` 打 `/v1/messages` + claude-cli headers。在 Sakrylle 返回 200 ~15ms 但 model 字段为空 — sub2api `usage_logs` 24h 内**一行都没**。探针"成功"但根本没走计费链路 → 静默假阳性。
 
@@ -164,13 +164,13 @@ curl -s https://status.sakrylle.com/api/version | jq
 
 ```bash
 # 1. relay-pulse 侧 probe_id
-ssh ssh-tokyo 'docker logs --tail=200 relay-pulse 2>&1 | grep -E "claude-kiro|probe_id"'
+ssh ssh-tokyo 'docker logs --tail=200 relay-pulse 2>&1 | grep -E "claude-kiro-special|probe_id"'
 
 # 2. sub2api 侧 usage_logs（key_id 在 sub2api 后台查）
 ssh ssh-tokyo 'docker exec sub2api-postgres psql -U sub2api -d sub2api -c \
   "SELECT created_at, model_name, total_cost FROM usage_logs WHERE api_key_id=<id> ORDER BY id DESC LIMIT 5"'
 
-# 3. 日志 200 但 usage_logs 空 → 静默假阳性（见 claude-kiro 那节）
+# 3. 日志 200 但 usage_logs 空 → 静默假阳性（见 claude-kiro-special 那节）
 ```
 
 ### 推前本地校验
