@@ -1,7 +1,7 @@
 # Sakrylle Status — Production config
 #
 # Probes Sakrylle API (sub.sakrylle.com) on behalf of users.
-# 7 monitors mirror the live token-billed groups in sub2api (excludes 2 Image groups).
+# 6 monitors mirror the live token-billed groups in sub2api (excludes 2 Image + GPT-Plus groups).
 #
 # API keys are injected via env vars; see env_var_name on each monitor.
 # All keys are scoped to one Sakrylle group each (api_keys.group_id is
@@ -97,25 +97,6 @@ monitors:
     retry: 3
     timeout: 30s
     env_var_name: MONITOR_SAKRYLLE_GPT_PRO_SPECIAL_API_KEY
-
-  # --- GPT-Plus: same upstream as GPT-Pro at deeper discount @ 0.25x ---
-  - provider: sakrylle
-    provider_name: Sakrylle API
-    provider_url: https://sub.sakrylle.com
-    service: cx
-    service_name: GPT
-    category: commercial
-    sponsor: Sakrylle
-    sponsor_url: https://sub.sakrylle.com
-    sponsor_level: core
-    key_type: official
-    channel: gpt-plus
-    channel_name: GPT-Plus
-    base_url: https://api.sakrylle.com
-    template: cx-gpt-mini-chat
-    retry: 3
-    timeout: 30s
-    env_var_name: MONITOR_SAKRYLLE_GPT_PLUS_API_KEY
 
   # --- Deepseek-V4-Flash: cheap probe via OpenAI-compat (Sakrylle 协议转换) @ 0.7x ---
   - provider: sakrylle
