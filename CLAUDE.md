@@ -55,24 +55,23 @@ ssh ssh-tokyo 'docker logs --tail=20 relay-pulse 2>&1 | grep -i reload'
 
 ## Monitors（生产）
 
-6 个探针，全部 `interval: 3m`，全部打 `https://api.sakrylle.com`，**每个 group 一把独立 API key**（sub2api `api_keys.group_id` 是单值）。
+5 个探针，全部 `interval: 3m`，全部打 `https://api.sakrylle.com`，**每个 group 一把独立 API key**（sub2api `api_keys.group_id` 是单值）。
 
 | Channel key | Service | Template | Model | Group (sub2api) | Rate |
 |---|---|---|---|---|---|
-| `claude-kiro-special` | `cc` | `cc-haiku-openai-chat` (fork) | `claude-haiku-4-5-20251001` | Claude-Kiro-Special (id 2) | 0.5x |
 | `claude-code-awsq` | `cc` | `cc-haiku-openai-chat` | `claude-haiku-4-5-20251001` | Claude-Code-AWSQ (id 12) | 0.4x |
 | `gpt-pro` | `cx` | `cx-gpt-mini-chat` | `gpt-5.4-mini` | GPT-Pro (id 14, 号池) | 0.5x |
 | `gpt-pro-special` | `cx` | `cx-gpt-mini-chat` | `gpt-5.4-mini` | GPT-Pro-Special (id 3, 旧名 GPT-Pro) | 0.4x |
 | `deepseek` | `dx` | `dx-flash-openai-chat` | `deepseek-v4-flash` | Deepseek (id 6, 阿里Token转售) | 0.7x |
 | `deepseek-official` | `dx` | `dx-flash-openai-chat` | `deepseek-v4-flash` | Deepseek-Official (id 9, 官方直连) | 1.0x |
 
-不监测：GPT-Image (id 5)、GPT-Image-2-4K (id 11) — 按调用计费，探针成本过高。Claude-Code (id 7)、Claude-Special (id 8)、GPT-Plus (id 4)、GPT-Plus-Special (id 10) 已下架。
+不监测：GPT-Image (id 5)、GPT-Image-2-4K (id 11) — 按调用计费，探针成本过高。Claude-Code (id 7)、Claude-Special (id 8)、Claude-Kiro (id 2)、GPT-Plus (id 4)、GPT-Plus-Special (id 10) 已下架。
 
 合计成本 ~$0.02/天（估算，基于 3m 节奏 + haiku/mini 单价）。3m 节奏自 2026-05-26 收紧（原 9m）。
 
 **2026-06-04 重大调整**：sub2api 后台将旧 GPT-Pro (id 3) 重命名为 GPT-Pro-Special，新上线 GPT-Pro (id 14) 号池。relay-pulse 同步调整：`gpt-pro` 历史数据迁移至 `gpt-pro-special`，新增 `gpt-pro` 和 `claude-code-awsq` 两个探针。
 
-**2026-06-13 调整**：下架 GPT-Plus (id 4) 探针，清除历史数据。探针数 7→6。
+**2026-06-13 调整**：下架 GPT-Plus (id 4) 探针，清除历史数据。探针数 7→6。下架 Claude-Kiro (id 2) 探针，清除全部历史数据。探针数 6→5。
 
 ### Retry / timeout
 
