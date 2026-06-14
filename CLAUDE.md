@@ -166,13 +166,14 @@ ssh ssh-tokyo 'cd /opt/stack && docker compose restart relay-pulse'
 # 强制拉最新镜像
 ssh ssh-tokyo 'cd /opt/stack && docker compose pull relay-pulse && docker compose up -d --force-recreate relay-pulse'
 
-# 查 monitor.db
-ssh ssh-tokyo 'docker exec relay-pulse sqlite3 /data/monitor.db ".tables"'
-ssh ssh-tokyo 'docker exec relay-pulse sqlite3 /data/monitor.db "SELECT * FROM events ORDER BY id DESC LIMIT 10"'
+# 查 monitor.db —— relay-pulse 镜像内没装 sqlite3，用临时 alpine 容器挂 volume 读
+# 表：probe_history / status_events / channel_states / service_states / monitor_overrides（没有 events 表）
+# probe_history 列：provider service channel model status sub_status latency timestamp(unix秒) error_detail http_code
+ssh ssh-tokyo 'docker run --rm -v stack_relay-pulse-data:/data alpine sh -c "apk add -q sqlite && sqlite3 /data/monitor.db .tables"'
+ssh ssh-tokyo 'docker run --rm -v stack_relay-pulse-data:/data alpine sh -c "apk add -q sqlite && sqlite3 -header -column /data/monitor.db \"SELECT channel,status,http_code,latency,timestamp FROM probe_history ORDER BY id DESC LIMIT 10;\""'
 
-# 备份
-ssh ssh-tokyo 'docker exec relay-pulse sqlite3 /data/monitor.db ".backup /tmp/monitor.db.bak" && \
-  docker cp relay-pulse:/tmp/monitor.db.bak /opt/stack/backups/relay-pulse-$(date +%F).db'
+# 备份（同样用临时容器；挂 /opt/stack/backups 直接落盘，.backup 在线备份不锁库）
+ssh ssh-tokyo 'docker run --rm -v stack_relay-pulse-data:/data -v /opt/stack/backups:/backup alpine sh -c "apk add -q sqlite && sqlite3 /data/monitor.db \".backup /backup/relay-pulse-\$(date +%F).db\""'
 
 # 健康
 curl -sI https://status.sakrylle.com/health
