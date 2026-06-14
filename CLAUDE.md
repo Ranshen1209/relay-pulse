@@ -55,23 +55,29 @@ ssh ssh-tokyo 'docker logs --tail=20 relay-pulse 2>&1 | grep -i reload'
 
 ## Monitors（生产）
 
-5 个探针，全部 `interval: 3m`，全部打 `https://api.sakrylle.com`，**每个 group 一把独立 API key**（sub2api `api_keys.group_id` 是单值）。
+9 个探针，全部 `interval: 3m`，全部打 `https://api.sakrylle.com`，**每个 group 一把独立 API key**（sub2api `api_keys.group_id` 是单值）。
 
 | Channel key | Service | Template | Model | Group (sub2api) | Rate |
 |---|---|---|---|---|---|
 | `claude-code-awsq` | `cc` | `cc-haiku-openai-chat` | `claude-haiku-4-5-20251001` | Claude-Code-AWSQ (id 12) | 0.4x |
+| `claude-kiro` | `cc` | `cc-haiku-openai-chat` | `claude-haiku-4-5-20251001` | Claude-Kiro (id 15) | 0.9x |
+| `claude-kiro-special` | `cc` | `cc-haiku-openai-chat` | `claude-haiku-4-5-20251001` | Claude-Kiro-Special (id 2) | 0.6x |
 | `gpt-pro` | `cx` | `cx-gpt-mini-chat` | `gpt-5.4-mini` | GPT-Pro (id 14, 号池) | 0.5x |
 | `gpt-pro-special` | `cx` | `cx-gpt-mini-chat` | `gpt-5.4-mini` | GPT-Pro-Special (id 3, 旧名 GPT-Pro) | 0.4x |
-| `deepseek` | `dx` | `dx-flash-openai-chat` | `deepseek-v4-flash` | Deepseek (id 6, 阿里Token转售) | 0.7x |
+| `deepseek` | `dx` | `dx-flash-openai-chat` | `deepseek-v4-flash` | Deepseek-Special (id 6, 旧名 Deepseek) | 0.7x |
 | `deepseek-official` | `dx` | `dx-flash-openai-chat` | `deepseek-v4-flash` | Deepseek-Official (id 9, 官方直连) | 1.0x |
+| `grok` | `gk` | `gk-grok-openai-chat` | `grok-4.20-0309-non-reasoning` | Grok-API (id 22) | 0.001x |
+| `agnes` | `ag` | `ag-flash-openai-chat` | `agnes-2.0-flash` | Agnes-API (id 23) | 0.001x |
 
-不监测：GPT-Image (id 5)、GPT-Image-2-4K (id 11) — 按调用计费，探针成本过高。Claude-Code (id 7)、Claude-Special (id 8)、Claude-Kiro (id 2)、GPT-Plus (id 4)、GPT-Plus-Special (id 10) 已下架。
+不监测（用户指定）：Claude-Max (id 16)、Claude-Max-C (id 17)。生图分组：GPT-Image (id 5)、GPT-Image-2-4K (id 11)、GPT-Image-2-Async (id 21) — 按调用计费，探针成本过高。
 
-合计成本 ~$0.02/天（估算，基于 3m 节奏 + haiku/mini 单价）。3m 节奏自 2026-05-26 收紧（原 9m）。
+合计探针成本极小（haiku/mini/flash 单价 + grok/agnes envelope ping）；agnes 单条最贵（固定 ~128 输出 token，约 $0.012/天）。3m 节奏自 2026-05-26 收紧（原 9m）。`gk`/`ag` 是新 service code，前端 `ServiceIcon.tsx` 已加 Grok/Agnes 品牌图标。
 
 **2026-06-04 重大调整**：sub2api 后台将旧 GPT-Pro (id 3) 重命名为 GPT-Pro-Special，新上线 GPT-Pro (id 14) 号池。relay-pulse 同步调整：`gpt-pro` 历史数据迁移至 `gpt-pro-special`，新增 `gpt-pro` 和 `claude-code-awsq` 两个探针。
 
 **2026-06-13 调整**：下架 GPT-Plus (id 4) 探针，清除历史数据。探针数 7→6。下架 Claude-Kiro (id 2) 探针，清除全部历史数据。探针数 6→5。
+
+**2026-06-14 重建**：清空 monitor.db 全部历史（不备份），探针扩至 9 个 —— 监测除 Claude-Max/Claude-Max-C/生图外全部 token 计费分组。新增 `claude-kiro` (id 15)、`claude-kiro-special` (id 2，sub2api 把旧 Claude-Kiro 重命名而来)、`grok` (id 22)、`agnes` (id 23)。sub2api 同期把 id 6 `Deepseek` 重命名为 `Deepseek-Special`。补回此前仅存服务器、未入库的 `dx-flash-openai-chat.json` 模板。探针数 5→9。
 
 ### Retry / timeout
 
@@ -96,6 +102,17 @@ key 在 sub2api 后台建，命名 `relay-pulse-{channel}`，绑定对应 group�
 上游 `cc-haiku-arith` 打 `/v1/messages` + claude-cli headers。在 Sakrylle 返回 200 ~15ms 但 model 字段为空 — sub2api `usage_logs` 24h 内**一行都没**。探针"成功"但根本没走计费链路 → 静默假阳性。
 
 `cc-haiku-openai-chat` 是 `cx-gpt-mini-chat` 的 fork，POST `/v1/chat/completions` + Claude model id。sub2api 内部 OpenAI→Anthropic 翻译上行，产生真实 `usage_logs`（~2s，真实计费）。**不要"修"回原生模板。**
+
+### Grok / Agnes 用 envelope 校验，不校验正文
+
+`grok`/`agnes` 是逆向端点，chat-completions 路径**拿不到可读回复**：
+
+- **Agnes** (`agnes-2.0-flash` / `agnes-1.5-flash`)：永远 `content=null`、`finish_reason=length`、固定 128 输出 token，**完全忽略 `max_tokens`**。prompt_tokens 固定 218（sub2api 注入大 system prompt）。
+- **Grok** (`grok-4.20-0309-non-reasoning`)：能返回正文但算术不可靠（问 6+7 答 "7"）。
+
+所以这俩模板不发算术题、不校验答案，改用 **envelope 校验**：`success_contains: "{{MODEL}}"` —— `{{MODEL}}` 在 `probe.go` 里会被替换成 request_model，匹配响应里回显的 `"model":"<id>"`。确认 200 + 正确路由 + 真实计费（usage_logs 有行），不依赖正文。两者均已实测产生真实 `usage_logs`，非静默假阳性。**别给它们换回算术模板。**
+
+`grok-build-console`（挂牌最便宜）从未被真实调用、疑似非对话 console 模型，**别用**。Agnes `max_tokens` 调大无用（永远 128）。
 
 ### Deepseek 探针走 OpenAI 路径 + max_tokens=8
 
