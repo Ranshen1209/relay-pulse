@@ -1,0 +1,27 @@
+{
+  "model": "Grok 4.20",
+  "request_model": "grok-4.20-0309-non-reasoning",
+  "url": "{{BASE_URL}}/v1/chat/completions",
+  "method": "POST",
+  "headers": {
+    "Authorization": "Bearer {{API_KEY}}",
+    "Content-Type": "application/json",
+    "User-Agent": "sakrylle-status/1.0"
+  },
+  "body": {
+    "model": "{{MODEL}}",
+    "max_tokens": 8,
+    "stream": false,
+    "messages": [
+      {"role": "user", "content": "ping"}
+    ]
+  },
+  "response": {
+    "success_contains": "{{MODEL}}"
+  },
+  "probe": {
+    "slow_latency": "5s",
+    "timeout": "15s",
+    "retry": 0
+  }
+}

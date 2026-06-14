@@ -1,0 +1,27 @@
+{
+  "model": "Agnes 2.0 Flash",
+  "request_model": "agnes-2.0-flash",
+  "url": "{{BASE_URL}}/v1/chat/completions",
+  "method": "POST",
+  "headers": {
+    "Authorization": "Bearer {{API_KEY}}",
+    "Content-Type": "application/json",
+    "User-Agent": "sakrylle-status/1.0"
+  },
+  "body": {
+    "model": "{{MODEL}}",
+    "max_tokens": 16,
+    "stream": false,
+    "messages": [
+      {"role": "user", "content": "ping"}
+    ]
+  },
+  "response": {
+    "success_contains": "{{MODEL}}"
+  },
+  "probe": {
+    "slow_latency": "8s",
+    "timeout": "30s",
+    "retry": 0
+  }
+}

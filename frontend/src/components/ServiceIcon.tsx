@@ -114,6 +114,35 @@ export function DeepSeekIcon({ className = 'w-5 h-5' }: ServiceIconProps) {
   );
 }
 
+export function GrokIcon({ className = 'w-5 h-5' }: ServiceIconProps) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      fillRule="evenodd"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M9.27 15.29l7.978-5.897c.391-.29.95-.177 1.137.272.98 2.369.542 5.215-1.41 7.169-1.951 1.954-4.667 2.382-7.149 1.406l-2.711 1.257c3.889 2.661 8.611 2.003 11.562-.953 2.341-2.344 3.066-5.539 2.388-8.42l.006.007c-.983-4.232.242-5.924 2.75-9.383.06-.082.12-.164.179-.248l-3.301 3.305v-.01L9.267 15.292M7.623 16.723c-2.792-2.67-2.31-6.801.071-9.184 1.761-1.763 4.647-2.483 7.166-1.425l2.705-1.25a7.808 7.808 0 00-1.829-1A8.975 8.975 0 005.984 5.83c-2.533 2.536-3.33 6.436-1.962 9.764 1.022 2.487-.653 4.246-2.34 6.022-.599.63-1.199 1.259-1.682 1.925l7.62-6.815" />
+    </svg>
+  );
+}
+
+export function AgnesIcon({ className = 'w-5 h-5' }: ServiceIconProps) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        fill="currentColor"
+        d="M21.97 9.47a1.07 1.07 0 0 1-.73 1.01l-1.88.62a4 4 0 0 0-2.53 2.54l-.65 1.87a1.1 1.1 0 0 1-.39.52a1.06 1.06 0 0 1-1.63-.54l-.63-1.88a3.9 3.9 0 0 0-1-1.56a4.06 4.06 0 0 0-1.57-1l-1.88-.63a1.05 1.05 0 0 1-.531-.38a1.08 1.08 0 0 1 0-1.25a1.05 1.05 0 0 1 .54-.39l1.87-.63a4 4 0 0 0 1.59-1c.45-.443.793-.984 1-1.58l.62-1.85a1 1 0 0 1 .36-.53a1 1 0 0 1 .62-.22a1.1 1.1 0 0 1 .63.18a1 1 0 0 1 .41.51l.63 1.91c.207.596.55 1.137 1 1.58a4 4 0 0 0 1.58 1l1.87.66a1 1 0 0 1 .52.38c.13.194.194.425.18.66M12.1 16.4a1 1 0 0 1-.18.57a1 1 0 0 1-.48.35l-1.35.45a2.6 2.6 0 0 0-1 .64a2.7 2.7 0 0 0-.64 1l-.47 1.34a1 1 0 0 1-.35.48a1 1 0 0 1-1.15 0a1 1 0 0 1-.35-.48l-.44-1.34a2.7 2.7 0 0 0-.641-1a2.7 2.7 0 0 0-1-.64l-1.35-.44a1 1 0 0 1-.48-.36a1 1 0 0 1-.19-.57a1 1 0 0 1 .68-.93l1.34-.44a2.78 2.78 0 0 0 1.64-1.64l.45-1.32a1 1 0 0 1 .33-.48a1 1 0 0 1 1.14-.05c.171.118.303.285.38.48l.45 1.37a2.78 2.78 0 0 0 1.64 1.64l1.34.47a.9.9 0 0 1 .47.35a.94.94 0 0 1 .21.55"
+      />
+    </svg>
+  );
+}
+
 // 服务类型到图标组件的映射
 type ServiceIconComponent = React.FC<ServiceIconProps>;
 
@@ -123,6 +152,8 @@ const SERVICE_ICON_MAP: Record<string, ServiceIconComponent> = {
   gemini: GeminiIcon,
   gm: GeminiIcon,
   dx: DeepSeekIcon,
+  gk: GrokIcon,
+  ag: AgnesIcon,
 };
 
 /**
@@ -140,6 +171,8 @@ export function getServiceIconComponent(serviceType: string): ServiceIconCompone
   if (key.includes('gpt') || key.includes('openai')) return OpenAIIcon;
   if (key.includes('gemini')) return GeminiIcon;
   if (key.includes('deepseek')) return DeepSeekIcon;
+  if (key.includes('grok')) return GrokIcon;
+  if (key.includes('agnes')) return AgnesIcon;
 
   return null;
 }

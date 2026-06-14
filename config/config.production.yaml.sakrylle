@@ -1,11 +1,19 @@
 # Sakrylle Status — Production config
 #
 # Probes Sakrylle API (sub.sakrylle.com) on behalf of users.
-# 5 monitors mirror the live token-billed groups in sub2api (excludes 2 Image + GPT-Plus + Claude-Kiro groups).
+# 9 monitors mirror the live token-billed groups in sub2api.
+# Excludes: Claude-Max (16), Claude-Max-C (17), and the 3 image groups
+# GPT-Image (5) / GPT-Image-2-4K (11) / GPT-Image-2-Async (21).
 #
 # API keys are injected via env vars; see env_var_name on each monitor.
 # All keys are scoped to one Sakrylle group each (api_keys.group_id is
 # single-valued in sub2api), so we need 1 key per group.
+#
+# Grok / Agnes are reverse endpoints whose chat-completions path returns
+# no readable assistant content (Agnes always empty; Grok unreliable at
+# arithmetic). Their templates use an envelope check — success_contains
+# matches the echoed model id, confirming HTTP 200 + correct routing +
+# real billing without depending on response text.
 
 interval: 3m          # default cadence — every monitor below inherits this
 slow_latency: 8s
@@ -40,6 +48,44 @@ monitors:
     retry: 3
     timeout: 30s
     env_var_name: MONITOR_SAKRYLLE_CLAUDE_CODE_AWSQ_API_KEY
+
+  # --- Claude-Kiro: Kiro 逆向 @ 0.9x ---
+  - provider: sakrylle
+    provider_name: Sakrylle API
+    provider_url: https://sub.sakrylle.com
+    service: cc
+    service_name: Claude
+    category: commercial
+    sponsor: Sakrylle
+    sponsor_url: https://sub.sakrylle.com
+    sponsor_level: core
+    key_type: official
+    channel: claude-kiro
+    channel_name: Claude-Kiro
+    base_url: https://api.sakrylle.com
+    template: cc-haiku-openai-chat
+    retry: 3
+    timeout: 30s
+    env_var_name: MONITOR_SAKRYLLE_CLAUDE_KIRO_API_KEY
+
+  # --- Claude-Kiro-Special: Kiro 逆向特惠 @ 0.6x ---
+  - provider: sakrylle
+    provider_name: Sakrylle API
+    provider_url: https://sub.sakrylle.com
+    service: cc
+    service_name: Claude
+    category: commercial
+    sponsor: Sakrylle
+    sponsor_url: https://sub.sakrylle.com
+    sponsor_level: core
+    key_type: official
+    channel: claude-kiro-special
+    channel_name: Claude-Kiro-Special
+    base_url: https://api.sakrylle.com
+    template: cc-haiku-openai-chat
+    retry: 3
+    timeout: 30s
+    env_var_name: MONITOR_SAKRYLLE_CLAUDE_KIRO_SPECIAL_API_KEY
 
   # --- GPT-Pro: gpt-5.4-mini cheap probe, 号池 @ 0.5x ---
   - provider: sakrylle
@@ -79,7 +125,7 @@ monitors:
     timeout: 30s
     env_var_name: MONITOR_SAKRYLLE_GPT_PRO_SPECIAL_API_KEY
 
-  # --- Deepseek-V4-Flash: cheap probe via OpenAI-compat (Sakrylle 协议转换) @ 0.7x ---
+  # --- Deepseek-Special: cheap probe via OpenAI-compat (Sakrylle 协议转换) @ 0.7x ---
   - provider: sakrylle
     provider_name: Sakrylle API
     provider_url: https://sub.sakrylle.com
@@ -91,7 +137,7 @@ monitors:
     sponsor_level: core
     key_type: official
     channel: deepseek
-    channel_name: Deepseek
+    channel_name: Deepseek-Special
     base_url: https://api.sakrylle.com
     template: dx-flash-openai-chat
     retry: 3
@@ -116,3 +162,41 @@ monitors:
     retry: 3
     timeout: 30s
     env_var_name: MONITOR_SAKRYLLE_DEEPSEEK_OFFICIAL_API_KEY
+
+  # --- Grok-API: grok-4.20-0309-non-reasoning, envelope check @ 0.001x ---
+  - provider: sakrylle
+    provider_name: Sakrylle API
+    provider_url: https://sub.sakrylle.com
+    service: gk
+    service_name: Grok
+    category: commercial
+    sponsor: Sakrylle
+    sponsor_url: https://sub.sakrylle.com
+    sponsor_level: core
+    key_type: official
+    channel: grok
+    channel_name: Grok-API
+    base_url: https://api.sakrylle.com
+    template: gk-grok-openai-chat
+    retry: 3
+    timeout: 30s
+    env_var_name: MONITOR_SAKRYLLE_GROK_API_KEY
+
+  # --- Agnes-API: agnes-2.0-flash, envelope check @ 0.001x ---
+  - provider: sakrylle
+    provider_name: Sakrylle API
+    provider_url: https://sub.sakrylle.com
+    service: ag
+    service_name: Agnes
+    category: commercial
+    sponsor: Sakrylle
+    sponsor_url: https://sub.sakrylle.com
+    sponsor_level: core
+    key_type: official
+    channel: agnes
+    channel_name: Agnes-API
+    base_url: https://api.sakrylle.com
+    template: ag-flash-openai-chat
+    retry: 3
+    timeout: 30s
+    env_var_name: MONITOR_SAKRYLLE_AGNES_API_KEY
