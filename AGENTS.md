@@ -92,26 +92,34 @@ ssh ssh-tokyo 'cd /opt/stack && docker compose up -d --force-recreate relay-puls
 
 ## 生产探针
 
-生产当前为 5 个探针，全部 `interval: 3m`，全部打 `https://api.sakrylle.com`。每个 group 使用独立 API key，因为 sub2api 的 `api_keys.group_id` 是单值。
+生产当前为 7 个探针，全部 `interval: 3m`，全部打 `https://api.sakrylle.com`。每个 group 使用独立 API key，因为 sub2api 的 `api_keys.group_id` 是单值。
 
 | Channel key | Service | Template | Model | Group (sub2api) | Rate |
 |---|---|---|---|---|---|
 | `claude-code-awsq` | `cc` | `cc-haiku-openai-chat` | `claude-haiku-4-5-20251001` | Claude-Code-AWSQ (id 12) | 0.4x |
+| `claude-kiro` | `cc` | `cc-haiku-openai-chat` | `claude-haiku-4-5-20251001` | Claude-Kiro (id 15) | 0.9x |
+| `claude-kiro-special` | `cc` | `cc-haiku-openai-chat` | `claude-haiku-4-5-20251001` | Claude-Kiro-Special (id 2) | 0.6x |
 | `gpt-pro` | `cx` | `cx-gpt-mini-chat` | `gpt-5.4-mini` | GPT-Pro (id 14, 号池) | 0.5x |
 | `gpt-pro-special` | `cx` | `cx-gpt-mini-chat` | `gpt-5.4-mini` | GPT-Pro-Special (id 3, 旧名 GPT-Pro) | 0.4x |
-| `deepseek` | `dx` | `dx-flash-openai-chat` | `deepseek-v4-flash` | Deepseek (id 6, 阿里 Token 转售) | 0.7x |
 | `deepseek-official` | `dx` | `dx-flash-openai-chat` | `deepseek-v4-flash` | Deepseek-Official (id 9, 官方直连) | 1.0x |
+| `grok` | `gk` | `gk-grok-openai-chat` | `grok-4.20-0309-non-reasoning` | Grok-API (id 22) | 0.001x |
 
 不监测：
 
-- GPT-Image (id 5)、GPT-Image-2-4K (id 11)：按调用计费，探针成本过高。
-- Claude-Code (id 7)、Claude-Special (id 8)、Claude-Kiro (id 2)、GPT-Plus (id 4)、GPT-Plus-Special (id 10)：已下架。
+- 用户指定不监测：Claude-Max (id 16)、Claude-Max-C (id 17)。
+- 生图分组：GPT-Image (id 5)、GPT-Image-2-4K (id 11)、GPT-Image-2-Async (id 21)，按调用计费，探针成本过高。
+- 已下架：Agnes-API (id 23)、Deepseek-Special (id 6 -> 28)，见 2026-06-15 调整。
+
+`gk`/`ag` 是新 service code，前端 `ServiceIcon.tsx` 已加 Grok/Agnes 品牌图标。Agnes 探针虽已下架，但图标保留；无探测时不渲染，移除会徒增 rebase 冲突。
 
 重要历史：
 
 - 2026-05-26：探针节奏由 9m 收紧到 3m。
 - 2026-06-04：sub2api 后台将旧 GPT-Pro (id 3) 重命名为 GPT-Pro-Special，新上线 GPT-Pro (id 14) 号池。relay-pulse 同步将 `gpt-pro` 历史数据迁移至 `gpt-pro-special`，新增 `gpt-pro` 和 `claude-code-awsq` 两个探针。
 - 2026-06-13：下架 GPT-Plus (id 4) 探针，清除历史数据。探针数 7→6。下架 Claude-Kiro (id 2) 探针，清除全部历史数据。探针数 6→5。
+- 2026-06-14：清空 monitor.db 全部历史（不备份），探针扩至 9 个。新增 `claude-kiro` (id 15)、`claude-kiro-special` (id 2，sub2api 把旧 Claude-Kiro 重命名而来)、`grok` (id 22)、`agnes` (id 23)。sub2api 同期把 id 6 `Deepseek` 重命名为 `Deepseek-Special`。补回此前仅存服务器、未入库的 `dx-flash-openai-chat.json` 模板。探针数 5→9。
+- 2026-06-15：清空 monitor.db 全部历史（不备份），下架 `agnes` (id 23) 探针。探针数 9→8。`ag-flash-openai-chat.json` 模板与前端 Agnes 图标保留未删；`.env` 里 `MONITOR_SAKRYLLE_AGNES_API_KEY` 成孤立行。
+- 2026-06-15（二）：下架 `deepseek` (Deepseek-Special) 探针，仅清该 channel 历史，未动 `deepseek-official`。探针数 8→7。`.env` 里 `MONITOR_SAKRYLLE_DEEPSEEK_API_KEY` 成孤立行。`deepseek-official` 不受影响，保留。
 
 ### Retry / timeout
 
@@ -140,12 +148,35 @@ ssh ssh-tokyo 'cd /opt/stack && docker compose up -d --force-recreate relay-puls
 
 `cc-haiku-openai-chat` 是 `cx-gpt-mini-chat` 的 fork，走 `POST /v1/chat/completions` 加 Claude model id。sub2api 内部执行 OpenAI -> Anthropic 翻译上行，会产生真实 `usage_logs`，约 2s，是真实计费。
 
+### Grok / Agnes 使用 envelope 校验
+
+`grok`/`agnes` 是逆向端点，chat-completions 路径拿不到稳定可读回复：
+
+- Agnes (`agnes-2.0-flash` / `agnes-1.5-flash`)：永远 `content=null`、`finish_reason=length`、固定 128 输出 token，且忽略 `max_tokens`。`prompt_tokens` 固定 218，因为 sub2api 注入大 system prompt。
+- Grok (`grok-4.20-0309-non-reasoning`)：能返回正文但算术不可靠，曾出现问 6+7 答 "7"。
+
+这两类模板不发算术题、不校验答案，改用 envelope 校验：`success_contains: "{{MODEL}}"`。`{{MODEL}}` 在 `probe.go` 里会被替换成 request_model，匹配响应里回显的 `"model":"<id>"`。目标是确认 200、正确路由和真实计费（`usage_logs` 有行），不依赖正文。不要把它们换回算术模板。
+
+`grok-build-console` 从未被真实调用，疑似非对话 console 模型，不要使用。Agnes `max_tokens` 调大无用，永远 128。
+
 ### Deepseek 探针走 OpenAI 路径
 
 - `dx-flash-openai-chat.json` 是自建模板。
-- `max_tokens: 8` 用来压低 thinking-token 成本。
-- Anthropic 路径也能通，但计费语义不同，因此锁定 OpenAI 路径。
+- `max_tokens: 8` 用来抑制 thinking-token 成本，deepseek 的 `thinking` block 不限制会爆。
+- Anthropic 路径也能通，sub2api 可双向翻译，但计费语义不同，因此锁定 OpenAI 路径。
 - 只探 `v4-flash`。`v4-pro` 与其上游同源，flash 通则 pro 通；pro 单价约 6x，不值得 3m 探一次。
+
+### Deepseek-Special 已下架原因
+
+Deepseek-Special 的 group 后台账号是 Krill 逆向号（`api.cdn-krill-ai.com/coding`，anthropic 平台）。Krill 的 `deepseek-v4-flash` 默认带 `thinking` 推理块，而 sub2api 的 cc 转发器处理不了流里的 `thinking` block，会报 `upstream stream ended without response` (502)。
+
+排查结论：
+
+- 直连 Krill（绕过 sub2api）stream/non-stream 都 200；加 `thinking:{type:"disabled"}` 后只回干净 text，说明 Krill 本身没坏。
+- 官方 Deepseek (`api.deepseek.com/anthropic`) 默认不出 thinking，走同一条 sub2api cc 路径稳定 200。
+- 经 sub2api 打 Krill 必 502，与 `max_tokens`、prompt、模板无关。
+
+注意：sub2api 后台「测试账号连接」是非流式直连，对 thinking 号会假阳性（显示 active/测试完成），但真实服务路径是流式、必挂。看到账号“绿”不等于服务路径通。未采纳的修复路径是 sub2api 侧给该账号关 thinking，或换非 thinking 号。另注：group 28 有较紧的 RPM 限流，密集 curl 会 429。
 
 ### GPT-Image 已下线
 
@@ -196,12 +227,14 @@ ssh ssh-tokyo 'cd /opt/stack && docker compose restart relay-pulse'
 # 强制拉最新镜像
 ssh ssh-tokyo 'cd /opt/stack && docker compose pull relay-pulse && docker compose up -d --force-recreate relay-pulse'
 
-# 查 monitor.db
-ssh ssh-tokyo 'docker exec relay-pulse sqlite3 /data/monitor.db ".tables"'
-ssh ssh-tokyo 'docker exec relay-pulse sqlite3 /data/monitor.db "SELECT * FROM events ORDER BY id DESC LIMIT 10"'
+# 查 monitor.db：relay-pulse 镜像内没装 sqlite3，用临时 alpine 容器挂 volume 读
+# 表：probe_history / status_events / channel_states / service_states / monitor_overrides（没有 events 表）
+# probe_history 列：provider service channel model status sub_status latency timestamp(unix秒) error_detail http_code
+ssh ssh-tokyo 'docker run --rm -v stack_relay-pulse-data:/data alpine sh -c "apk add -q sqlite && sqlite3 /data/monitor.db .tables"'
+ssh ssh-tokyo 'docker run --rm -v stack_relay-pulse-data:/data alpine sh -c "apk add -q sqlite && sqlite3 -header -column /data/monitor.db \"SELECT channel,status,http_code,latency,timestamp FROM probe_history ORDER BY id DESC LIMIT 10;\""'
 
-# 备份
-ssh ssh-tokyo 'docker exec relay-pulse sqlite3 /data/monitor.db ".backup /tmp/monitor.db.bak" && docker cp relay-pulse:/tmp/monitor.db.bak /opt/stack/backups/relay-pulse-$(date +%F).db'
+# 备份：挂 /opt/stack/backups 直接落盘，.backup 在线备份不锁库
+ssh ssh-tokyo 'docker run --rm -v stack_relay-pulse-data:/data -v /opt/stack/backups:/backup alpine sh -c "apk add -q sqlite && sqlite3 /data/monitor.db \".backup /backup/relay-pulse-\$(date +%F).db\""'
 
 # 健康
 curl -sI https://status.sakrylle.com/health

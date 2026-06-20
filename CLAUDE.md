@@ -55,7 +55,7 @@ ssh ssh-tokyo 'docker logs --tail=20 relay-pulse 2>&1 | grep -i reload'
 
 ## Monitors（生产）
 
-9 个探针，全部 `interval: 3m`，全部打 `https://api.sakrylle.com`，**每个 group 一把独立 API key**（sub2api `api_keys.group_id` 是单值）。
+7 个探针，全部 `interval: 3m`，全部打 `https://api.sakrylle.com`，**每个 group 一把独立 API key**（sub2api `api_keys.group_id` 是单值）。
 
 | Channel key | Service | Template | Model | Group (sub2api) | Rate |
 |---|---|---|---|---|---|
@@ -64,20 +64,24 @@ ssh ssh-tokyo 'docker logs --tail=20 relay-pulse 2>&1 | grep -i reload'
 | `claude-kiro-special` | `cc` | `cc-haiku-openai-chat` | `claude-haiku-4-5-20251001` | Claude-Kiro-Special (id 2) | 0.6x |
 | `gpt-pro` | `cx` | `cx-gpt-mini-chat` | `gpt-5.4-mini` | GPT-Pro (id 14, 号池) | 0.5x |
 | `gpt-pro-special` | `cx` | `cx-gpt-mini-chat` | `gpt-5.4-mini` | GPT-Pro-Special (id 3, 旧名 GPT-Pro) | 0.4x |
-| `deepseek` | `dx` | `dx-flash-openai-chat` | `deepseek-v4-flash` | Deepseek-Special (id 6, 旧名 Deepseek) | 0.7x |
 | `deepseek-official` | `dx` | `dx-flash-openai-chat` | `deepseek-v4-flash` | Deepseek-Official (id 9, 官方直连) | 1.0x |
 | `grok` | `gk` | `gk-grok-openai-chat` | `grok-4.20-0309-non-reasoning` | Grok-API (id 22) | 0.001x |
-| `agnes` | `ag` | `ag-flash-openai-chat` | `agnes-2.0-flash` | Agnes-API (id 23) | 0.001x |
 
-不监测（用户指定）：Claude-Max (id 16)、Claude-Max-C (id 17)。生图分组：GPT-Image (id 5)、GPT-Image-2-4K (id 11)、GPT-Image-2-Async (id 21) — 按调用计费，探针成本过高。
+不监测（用户指定）：Claude-Max (id 16)、Claude-Max-C (id 17)。生图分组：GPT-Image (id 5)、GPT-Image-2-4K (id 11)、GPT-Image-2-Async (id 21) — 按调用计费，探针成本过高。已下架：Agnes-API (id 23)、Deepseek-Special (id 6 → 28)，见 2026-06-15 调整。
 
-合计探针成本极小（haiku/mini/flash 单价 + grok/agnes envelope ping）；agnes 单条最贵（固定 ~128 输出 token，约 $0.012/天）。3m 节奏自 2026-05-26 收紧（原 9m）。`gk`/`ag` 是新 service code，前端 `ServiceIcon.tsx` 已加 Grok/Agnes 品牌图标。
+合计探针成本极小（haiku/mini/flash 单价 + grok envelope ping）。3m 节奏自 2026-05-26 收紧（原 9m）。`gk`/`ag` 是新 service code，前端 `ServiceIcon.tsx` 已加 Grok/Agnes 品牌图标（Agnes 探针虽下架，图标保留——无探测时不渲染，移除会徒增 rebase 冲突）。
 
 **2026-06-04 重大调整**：sub2api 后台将旧 GPT-Pro (id 3) 重命名为 GPT-Pro-Special，新上线 GPT-Pro (id 14) 号池。relay-pulse 同步调整：`gpt-pro` 历史数据迁移至 `gpt-pro-special`，新增 `gpt-pro` 和 `claude-code-awsq` 两个探针。
 
 **2026-06-13 调整**：下架 GPT-Plus (id 4) 探针，清除历史数据。探针数 7→6。下架 Claude-Kiro (id 2) 探针，清除全部历史数据。探针数 6→5。
 
 **2026-06-14 重建**：清空 monitor.db 全部历史（不备份），探针扩至 9 个 —— 监测除 Claude-Max/Claude-Max-C/生图外全部 token 计费分组。新增 `claude-kiro` (id 15)、`claude-kiro-special` (id 2，sub2api 把旧 Claude-Kiro 重命名而来)、`grok` (id 22)、`agnes` (id 23)。sub2api 同期把 id 6 `Deepseek` 重命名为 `Deepseek-Special`。补回此前仅存服务器、未入库的 `dx-flash-openai-chat.json` 模板。探针数 5→9。
+
+**2026-06-15 调整**：清空 monitor.db 全部历史（不备份），下架 `agnes` (id 23) 探针（从 `config.yaml` 删除 Agnes 块，热重载生效）。探针数 9→8。`ag-flash-openai-chat.json` 模板与前端 `ServiceIcon.tsx` 的 Agnes 图标保留未删；`.env` 里 `MONITOR_SAKRYLLE_AGNES_API_KEY` 成孤立行（无害，下次轮换清掉）。
+
+**2026-06-15 调整（二）**：下架 `deepseek` (Deepseek-Special) 探针，仅清该 channel 历史（`DELETE ... WHERE channel='deepseek'`，未动 `deepseek-official`）。探针数 8→7。`.env` 里 `MONITOR_SAKRYLLE_DEEPSEEK_API_KEY` 成孤立行。**`deepseek-official` 不受影响，保留。**
+
+下架原因（排查记录，别再绕）：Deepseek-Special 的 group 后台账号是 Krill 逆向号（`api.cdn-krill-ai.com/coding`，anthropic 平台）。**Krill 的 deepseek-v4-flash 默认带 `thinking` 推理块，而 sub2api 的 cc 转发器处理不了流里的 `thinking` block → 报 `upstream stream ended without response` (502)**。判定链：① 直连 Krill（绕过 sub2api）stream/non-stream 都 200，加 `thinking:{type:"disabled"}` 则只回干净 text → Krill 本身没坏；② 官方 Deepseek (`api.deepseek.com/anthropic`) 默认不出 thinking，走同一条 sub2api cc 路径稳定 200；③ 经 sub2api 打 Krill 必 502，与 `max_tokens`/prompt/模板无关。**坑：sub2api 后台「测试账号连接」是非流式直连，对 thinking 号会假阳性（显示 active/测试完成），但真实服务路径是流式、必挂。看到账号"绿"≠服务路径通。** 修复路径（未采纳，直接下架了）：sub2api 侧给该账号关 thinking（`extra` 当时为 `{}`，无开关），或换非 thinking 号。另注：group 28 有较紧的 RPM 限流，密集 curl 会 429。
 
 ### Retry / timeout
 
