@@ -1,25 +1,30 @@
-# Repository Guidelines
+# Sakrylle Status Agent Guide
 
-> 本文件为仓库中所有「智能体 / 机器人 / 助手」提供协作规范，**仅供 AI 使用和维护**。人类贡献者一般无需阅读或修改本文件。
+> 本文件面向仓库内所有「智能体 / 机器人 / 助手」，仅供 AI 使用和维护。人类贡献者一般无需阅读或修改。
 
-## 交互与语言约定
+## 0. 最高优先级
 
-- 本项目所有「智能体 / 机器人 / 助手」与维护者互动时，应**始终使用简体中文**进行沟通与回复。
-- 评论、Issue、PR 描述和代码内用户可见文案，优先使用中文；如需英文，请保证含义与中文一致，并以中文为主。
-- 如果外部工具或脚本只能输出英文，应在说明中简要补充中文解释。
+- 与维护者互动时，始终使用**简体中文**。
+- 不提交真实 API Key、数据库密码、生产 `.env` 等敏感信息。
+- 不直接修改 `internal/api/frontend/` 下的嵌入产物；前端源码在 `frontend/`，Go embed 所需的 `internal/api/frontend/dist/` 由构建脚本同步，且已被 `.gitignore` 忽略。
+- 不随意新增顶层文档；确有必要时先与用户确认。
+- 面向人类的回复、README 导航、Issue/PR 描述中，不主动推荐或暴露 `AGENTS.md`、`CLAUDE.md`，除非用户明确询问。
+- 遇到仓库中已有未提交改动时，视为用户或其他工具的改动；除非用户明确要求，不要回滚。
 
-## 文档策略（仅供 AI）
+## 1. 文档策略
 
-- 面向人类读者，项目方**重点维护的核心文档只有**：
-  - `README.md`（入口、快速开始、本地开发）
-  - `QUICKSTART.md`（快速部署与常见问题）
-  - `docs/user/config.md`（配置与环境变量说明）
-  - `CONTRIBUTING.md`（贡献流程与规范）
-- `AGENTS.md`、`CLAUDE.md` 视为 AI 内部文档，**不要在面向人类的回复、README 导航等位置主动推荐或暴露**，除非用户明确询问。
-- `archive/` 中的文档均为**历史文档**：可以作为补充背景使用，但引用时必须标注「历史文档，仅供参考，以当前核心文档和代码实现为准」。
-- AI 不应随意新增顶层文档；如确有必要，应与用户确认后再创建。
+面向人类读者，项目方重点维护的核心文档只有：
 
-## 仓库背景
+- `README.md`：入口、快速开始、本地开发。
+- `QUICKSTART.md`：快速部署与常见问题。
+- `docs/user/config.md`：配置与环境变量说明。
+- `CONTRIBUTING.md`：贡献流程与规范。
+
+`archive/` 中的文档均为历史文档。引用时必须标注：「历史文档，仅供参考，以当前核心文档和代码实现为准」。
+
+评论、Issue、PR 描述和代码内用户可见文案优先使用中文；如需英文，应保证含义与中文一致，并以中文为主。外部工具或脚本只能输出英文时，在说明中补充简短中文解释。
+
+## 2. 仓库事实
 
 - 本仓库是 [prehisle/relay-pulse](https://github.com/prehisle/relay-pulse) 的 Sakrylle Status fork。
 - 上游：`prehisle/relay-pulse`
@@ -29,7 +34,9 @@
 - 生产域名：`status.sakrylle.com`
 - 服务器：`cliproxyapi-jp`（`64.83.47.108`，SSH 别名 `ssh-tokyo`）
 - Compose stack：`/opt/stack/`
-- 本站是 Sakrylle API 网关（`Ranshen1209/sub2api`，分支 `theme/monet-purple`）的伴生监测站。探针打的是网关上真实的 group，成本和排障与网关强耦合。
+- 伴生网关：`Ranshen1209/sub2api`，分支 `theme/monet-purple`。
+
+本站是 Sakrylle API 网关的伴生监测站。探针打的是网关上真实的 group，成本和排障都与网关强耦合。
 
 查看 fork 与上游差异时，优先使用：
 
@@ -37,15 +44,35 @@
 git diff upstream/main
 ```
 
-## 配置与安全提示
+## 3. 配置与安全
 
-- 禁止提交真实 API Key、数据库密码等敏感信息；仅更新 `config.yaml.example`，实际值通过环境变量或本地未入库配置文件注入。
-- API key 生产实际值放在服务器 `/opt/stack/relay-pulse/.env`，文件权限应为 `600`，通过 compose 的 `env_file:` 注入。
-- `config.yaml` 支持 fsnotify 热重载；`.env` **不支持热更新**，改完必须重建容器。
-- 修改与存储相关逻辑时，需同时在 SQLite（默认）和 PostgreSQL 场景下验证。
-- 不要直接修改 `internal/api/frontend/` 下的嵌入产物；前端源码在 `frontend/`，Go embed 需要的 `internal/api/frontend/dist/` 由构建脚本同步，且已被 `.gitignore` 忽略。
+- 生产 API key 实际值放在服务器 `/opt/stack/relay-pulse/.env`，文件权限应为 `600`，通过 compose 的 `env_file:` 注入。
+- 只更新 `config.yaml.example` 等示例配置；真实值通过环境变量或本地未入库配置文件注入。
+- `config.yaml` 支持 fsnotify 热重载；`.env` 不支持热更新，改完必须重建容器。
+- 修改存储相关逻辑时，需同时验证 SQLite（默认）和 PostgreSQL。
+- sub2api 后台创建 key 时，命名为 `relay-pulse-<channel>`，并绑定对应 group。
+- 环境变量名约定：`MONITOR_SAKRYLLE_<CHANNEL>_API_KEY`。
+- `config.yaml` 中使用 `env_var_name:` 显式引用，覆盖自动名 `MONITOR_{PROVIDER}_{SERVICE}_{CHANNEL}_API_KEY`。
+- 孤立 env 行（无 monitor 引用）无害，下次轮换时清理。
 
-## 构建与部署
+## 4. 生产环境
+
+```text
+/opt/stack/
+├── docker-compose.yml
+└── relay-pulse/
+    ├── .env                    # API keys，mode 600，env_file 注入
+    ├── config/
+    │   ├── config.yaml
+    │   └── templates/          # 探测模板
+    └── (volume) stack_relay-pulse-data -> /data/monitor.db (SQLite)
+```
+
+- 反代链路：`Public 443 -> sslh -> 127.0.0.1:8443 -> Nginx (server_name status.sakrylle.com) -> relay-pulse:8080`
+- Nginx 配置：`/opt/stack/nginx/conf.d/sakrylle-status.conf`
+- Docker 网络：`stack_default`，与 sub2api 系列共用。
+
+## 5. 工作流速查
 
 ### 代码改动
 
@@ -73,53 +100,46 @@ ssh ssh-tokyo 'docker logs --tail=20 relay-pulse 2>&1 | grep -i reload'
 ssh ssh-tokyo 'cd /opt/stack && docker compose up -d --force-recreate relay-pulse'
 ```
 
-## 生产服务器布局
+### 本地开发与校验
 
-```text
-/opt/stack/
-├── docker-compose.yml
-└── relay-pulse/
-    ├── .env                    # API keys，mode 600，env_file 注入
-    ├── config/
-    │   ├── config.yaml
-    │   └── templates/          # 探测模板
-    └── (volume) stack_relay-pulse-data -> /data/monitor.db (SQLite)
+```bash
+./scripts/setup-dev.sh
+./scripts/setup-dev.sh --rebuild-frontend
+make dev
+cd frontend && npm run dev
+make ci
 ```
 
-- 反代链路：`Public 443 -> sslh -> 127.0.0.1:8443 -> Nginx (server_name status.sakrylle.com) -> relay-pulse:8080`
-- Nginx 配置：`/opt/stack/nginx/conf.d/sakrylle-status.conf`
-- Docker 网络：`stack_default`，与 sub2api 系列共用。
+推前最小校验：
 
-## 生产探针
+```bash
+go build -o /tmp/relay-pulse ./cmd/server
+go vet ./...
+go run ./cmd/verify/main.go -provider Sakrylle -service cc -v
+```
 
-生产当前为 7 个探针，全部 `interval: 3m`，全部打 `https://api.sakrylle.com`。每个 group 使用独立 API key，因为 sub2api 的 `api_keys.group_id` 是单值。
+`make ci` 包含 gofmt、vet、go test 和 npm lint。代码变更完成后优先运行。
+
+## 6. 生产探针
+
+生产当前为 6 个探针，全部 `interval: 3m`，全部打 `https://api.sakrylle.com`。每个 group 使用独立 API key，因为 sub2api 的 `api_keys.group_id` 是单值。
 
 | Channel key | Service | Template | Model | Group (sub2api) | Rate |
 |---|---|---|---|---|---|
-| `claude-code-awsq` | `cc` | `cc-haiku-openai-chat` | `claude-haiku-4-5-20251001` | Claude-Code-AWSQ (id 12) | 0.4x |
 | `claude-kiro` | `cc` | `cc-haiku-openai-chat` | `claude-haiku-4-5-20251001` | Claude-Kiro (id 15) | 0.9x |
 | `claude-kiro-special` | `cc` | `cc-haiku-openai-chat` | `claude-haiku-4-5-20251001` | Claude-Kiro-Special (id 2) | 0.6x |
 | `gpt-pro` | `cx` | `cx-gpt-mini-chat` | `gpt-5.4-mini` | GPT-Pro (id 14, 号池) | 0.5x |
-| `gpt-pro-special` | `cx` | `cx-gpt-mini-chat` | `gpt-5.4-mini` | GPT-Pro-Special (id 3, 旧名 GPT-Pro) | 0.4x |
-| `deepseek-official` | `dx` | `dx-flash-openai-chat` | `deepseek-v4-flash` | Deepseek-Official (id 9, 官方直连) | 1.0x |
+| `gpt-pro-special` | `cx` | `cx-gpt-mini-chat` | `gpt-5.4-mini` | GPT-Pro-Special (id 3，旧名 GPT-Pro) | 0.4x |
+| `deepseek-official` | `dx` | `dx-flash-openai-chat` | `deepseek-v4-flash` | Deepseek-Official (id 9，官方直连) | 1.0x |
 | `grok` | `gk` | `gk-grok-openai-chat` | `grok-4.20-0309-non-reasoning` | Grok-API (id 22) | 0.001x |
 
 不监测：
 
 - 用户指定不监测：Claude-Max (id 16)、Claude-Max-C (id 17)。
 - 生图分组：GPT-Image (id 5)、GPT-Image-2-4K (id 11)、GPT-Image-2-Async (id 21)，按调用计费，探针成本过高。
-- 已下架：Agnes-API (id 23)、Deepseek-Special (id 6 -> 28)，见 2026-06-15 调整。
+- 已下架：Agnes-API (id 23)、Deepseek-Special (id 6 -> 28)、Claude-Code-AWSQ (id 12)，见历史调整。
 
 `gk`/`ag` 是新 service code，前端 `ServiceIcon.tsx` 已加 Grok/Agnes 品牌图标。Agnes 探针虽已下架，但图标保留；无探测时不渲染，移除会徒增 rebase 冲突。
-
-重要历史：
-
-- 2026-05-26：探针节奏由 9m 收紧到 3m。
-- 2026-06-04：sub2api 后台将旧 GPT-Pro (id 3) 重命名为 GPT-Pro-Special，新上线 GPT-Pro (id 14) 号池。relay-pulse 同步将 `gpt-pro` 历史数据迁移至 `gpt-pro-special`，新增 `gpt-pro` 和 `claude-code-awsq` 两个探针。
-- 2026-06-13：下架 GPT-Plus (id 4) 探针，清除历史数据。探针数 7→6。下架 Claude-Kiro (id 2) 探针，清除全部历史数据。探针数 6→5。
-- 2026-06-14：清空 monitor.db 全部历史（不备份），探针扩至 9 个。新增 `claude-kiro` (id 15)、`claude-kiro-special` (id 2，sub2api 把旧 Claude-Kiro 重命名而来)、`grok` (id 22)、`agnes` (id 23)。sub2api 同期把 id 6 `Deepseek` 重命名为 `Deepseek-Special`。补回此前仅存服务器、未入库的 `dx-flash-openai-chat.json` 模板。探针数 5→9。
-- 2026-06-15：清空 monitor.db 全部历史（不备份），下架 `agnes` (id 23) 探针。探针数 9→8。`ag-flash-openai-chat.json` 模板与前端 Agnes 图标保留未删；`.env` 里 `MONITOR_SAKRYLLE_AGNES_API_KEY` 成孤立行。
-- 2026-06-15（二）：下架 `deepseek` (Deepseek-Special) 探针，仅清该 channel 历史，未动 `deepseek-official`。探针数 8→7。`.env` 里 `MONITOR_SAKRYLLE_DEEPSEEK_API_KEY` 成孤立行。`deepseek-official` 不受影响，保留。
 
 ### Retry / timeout
 
@@ -131,14 +151,17 @@ ssh ssh-tokyo 'cd /opt/stack && docker compose up -d --force-recreate relay-puls
 - 挑选 timeout 时要满足：`timeout > slowest_real_call + sum(backoffs)`。
 - 默认退避：`retry_base_delay=200ms`、`retry_max_delay=2s`、`retry_jitter=0.2`。
 
-### API key 约定
+### 探针历史
 
-- sub2api 后台创建 key，命名 `relay-pulse-<channel>`，绑定对应 group。
-- 环境变量名约定：`MONITOR_SAKRYLLE_<CHANNEL>_API_KEY`。
-- `config.yaml` 中使用 `env_var_name:` 显式引用，覆盖自动名 `MONITOR_{PROVIDER}_{SERVICE}_{CHANNEL}_API_KEY`。
-- 孤立的 env 行（无 monitor 引用）无害，下次轮换时清理。
+- 2026-05-26：探针节奏由 9m 收紧到 3m。
+- 2026-06-04：sub2api 后台将旧 GPT-Pro (id 3) 重命名为 GPT-Pro-Special，新上线 GPT-Pro (id 14) 号池。relay-pulse 同步将 `gpt-pro` 历史数据迁移至 `gpt-pro-special`，新增 `gpt-pro` 和 `claude-code-awsq` 两个探针。
+- 2026-06-13：下架 GPT-Plus (id 4) 探针，清除历史数据。探针数 7 -> 6。下架 Claude-Kiro (id 2) 探针，清除全部历史数据。探针数 6 -> 5。
+- 2026-06-14：清空 monitor.db 全部历史（不备份），探针扩至 9 个。新增 `claude-kiro` (id 15)、`claude-kiro-special` (id 2，sub2api 把旧 Claude-Kiro 重命名而来)、`grok` (id 22)、`agnes` (id 23)。sub2api 同期把 id 6 `Deepseek` 重命名为 `Deepseek-Special`。补回此前仅存服务器、未入库的 `dx-flash-openai-chat.json` 模板。探针数 5 -> 9。
+- 2026-06-15：清空 monitor.db 全部历史（不备份），下架 `agnes` (id 23) 探针。探针数 9 -> 8。`ag-flash-openai-chat.json` 模板与前端 Agnes 图标保留未删；`.env` 里 `MONITOR_SAKRYLLE_AGNES_API_KEY` 成孤立行。
+- 2026-06-15（二）：下架 `deepseek` (Deepseek-Special) 探针，仅清该 channel 历史，未动 `deepseek-official`。探针数 8 -> 7。`.env` 里 `MONITOR_SAKRYLLE_DEEPSEEK_API_KEY` 成孤立行。`deepseek-official` 不受影响，保留。
+- 2026-06-26：下架 `claude-code-awsq` (id 12) 探针，清除该 channel 历史数据。探针数 7 -> 6。`.env` 里 `MONITOR_SAKRYLLE_CLAUDE_CODE_AWSQ_API_KEY` 成孤立行。
 
-## 已踩过的坑
+## 7. 高风险坑位
 
 ### claude-kiro-special 必须使用 OpenAI-compatible 模板
 
@@ -182,12 +205,12 @@ Deepseek-Special 的 group 后台账号是 Krill 逆向号（`api.cdn-krill-ai.c
 
 GPT-Image 按调用计费，真实探针成本约 `$0.15/call`。仅 `/v1/models` ping 又拿不到实质信号，因此 2026-05-23 已移除。
 
-## Sakrylle 定制与上游同步
+## 8. Sakrylle 定制与上游同步
 
 这些定制都在 `theme/sakrylle`，每次 rebase 上游都容易冲突：
 
 - 主题：从上游 4 个主题改为 2 个主题（`default-dark`、`light-cool`）。亮色主题使用 hue 256（Monet 薰衣草），不是上游 hue 210。
-- 品牌："Sakrylle Status" 分布于 React i18n（zh/en/ru/ja 4 个 locale）和 Go SSR meta（`internal/api/meta.go` title/description/JSON-LD/404）。
+- 品牌：`Sakrylle Status` 分布于 React i18n（zh/en/ru/ja 4 个 locale）和 Go SSR meta（`internal/api/meta.go` title/description/JSON-LD/404）。
 - Logo：樱花 SVG 替代上游 RP 文字 logo。
 - 语言切换：使用文字代码（ZH/EN/RU/JA），无国旗图标。
 - 删除页面/组件：`ContactPage`、`OnboardingPage`、`ChangeRequestPage`、`Footer.tsx`、`useOnboarding`、`useChangeRequest`、`utils/share.ts`。rebase 后它们可能回来，需要重新删除。
@@ -216,7 +239,7 @@ make ci
 
 rebase 后重点检查：已删页面是否回归、主题 hue 是否被上游覆盖、品牌字符串是否完整、状态表隐藏列和注解过滤是否还在。
 
-## 常用运维命令
+## 9. 运维命令
 
 ```bash
 # 状态/日志/重启
@@ -253,34 +276,14 @@ ssh ssh-tokyo 'docker exec sub2api-postgres psql -U sub2api -d sub2api -c "SELEC
 # 3. 如果 relay-pulse 日志 200 但 usage_logs 空，优先怀疑静默假阳性
 ```
 
-## 本地开发与校验
-
-```bash
-./scripts/setup-dev.sh
-./scripts/setup-dev.sh --rebuild-frontend
-make dev
-cd frontend && npm run dev
-make ci
-```
-
-推前最小校验：
-
-```bash
-go build -o /tmp/relay-pulse ./cmd/server
-go vet ./...
-go run ./cmd/verify/main.go -provider Sakrylle -service cc -v
-```
-
-`make ci` 包含 gofmt、vet、go test 和 npm lint，代码变更完成后优先运行。
-
-## API key 轮换
+## 10. API key 轮换
 
 1. sub2api 后台 -> API Keys -> 重置 `relay-pulse-<channel>`，记下新值。
 2. 修改 `/opt/stack/relay-pulse/.env` 中对应 `MONITOR_SAKRYLLE_<CHANNEL>_API_KEY=...`。
 3. 运行 `docker compose up -d --force-recreate relay-pulse`，因为 env 不热更新。
 4. 在 sub2api 后台撤销旧 key；Redis pub/sub 会自动失效，旧 key 缓存最长约 60s。
 
-## 相关上下文
+## 11. 相关上下文
 
 - 网关仓库：`/Volumes/APFS_HD/Documents/Github/sub2api`，分支 `theme/monet-purple`。它的 `CLAUDE.md` 包含上游 channel 映射、group 倍率、`/v1/models` 聚合逻辑。
 - Obsidian 部署笔记：`20 Work/ServerOps/Self-Hosted/Sub2API 部署.md`。
