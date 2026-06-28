@@ -8,9 +8,9 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"monitor/internal/config"
+	"monitor/internal/inlineprobe"
 	"monitor/internal/logger"
 	"monitor/internal/onboarding"
-	"monitor/internal/probe"
 )
 
 // OnboardingMetaResponse 申请表单元数据
@@ -126,7 +126,7 @@ func (h *Handler) GetOnboardingMeta(c *gin.Context) {
 
 	// 获取可用测试类型（从 probe 注册表）
 	var testTypes []OnboardingTestType
-	for _, t := range probe.ListTestTypes() {
+	for _, t := range inlineprobe.ListTestTypes() {
 		var variants []OnboardingVariant
 		for _, v := range t.Variants {
 			if v != nil {
@@ -261,7 +261,7 @@ func (h *Handler) OnboardingTest(c *gin.Context) {
 	}
 
 	// SSRF 前置校验
-	guard := probe.NewSSRFGuard()
+	guard := inlineprobe.NewSSRFGuard()
 	if err := guard.ValidateURL(req.BaseURL); err != nil {
 		apiError(c, http.StatusBadRequest, ErrCodeInvalidParam, "URL 安全校验失败: "+err.Error())
 		return

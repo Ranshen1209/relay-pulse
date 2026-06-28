@@ -1,16 +1,16 @@
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
-import { useAdmin } from '../hooks/useAdmin';
-import { useMonitorAdmin } from '../hooks/useMonitorAdmin';
-import { useChangeAdmin } from '../hooks/useChangeAdmin';
-import { AdminAuth } from '../components/admin/AdminAuth';
-import { SubmissionList } from '../components/admin/SubmissionList';
-import { SubmissionDetail } from '../components/admin/SubmissionDetail';
-import { MonitorList } from '../components/admin/MonitorList';
-import { MonitorDetail } from '../components/admin/MonitorDetail';
-import { MonitorForm } from '../components/admin/MonitorForm';
-import { ChangeRequestList } from '../components/admin/ChangeRequestList';
+import { useAdmin } from '../features/admin/hooks/useAdmin';
+import { useMonitorAdmin } from '../features/admin/hooks/useMonitorAdmin';
+import { useChangeAdmin } from '../features/admin/hooks/useChangeAdmin';
+import { AdminAuth } from '../features/admin/components/AdminAuth';
+import { SubmissionList } from '../features/admin/components/SubmissionList';
+import { SubmissionDetail } from '../features/admin/components/SubmissionDetail';
+import { MonitorList } from '../features/admin/components/MonitorList';
+import { MonitorDetail } from '../features/admin/components/MonitorDetail';
+import { MonitorForm } from '../features/admin/components/MonitorForm';
+import { ChangeRequestList } from '../features/admin/components/ChangeRequestList';
 
 type AdminTab = 'submissions' | 'monitors' | 'changes';
 

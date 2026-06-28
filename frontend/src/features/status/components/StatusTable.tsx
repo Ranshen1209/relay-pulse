@@ -1,0 +1,754 @@
+import { useState, useEffect, useRef, useCallback, useMemo, memo } from 'react';
+import { createPortal } from 'react-dom';
+import { List, type RowComponentProps } from 'react-window';
+import { ArrowUpDown, ArrowUp, ArrowDown, Zap, Shield, Filter } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { StatusDot } from './StatusDot';
+import { HeatmapBlock } from './HeatmapBlock';
+import { LayeredHeatmapBlock } from './LayeredHeatmapBlock';
+import { ChannelTypeIcon, parseChannelType } from '../../../components/ChannelTypeIcon';
+import { ExternalLink } from '../../../components/ExternalLink';
+import { AnnotationCell } from './annotations';
+import { FavoriteButton } from '../../../components/FavoriteButton';
+import { getTimeRanges } from '../../../constants';
+import { availabilityToColor, latencyToColor, sponsorLevelToBorderClass, sponsorLevelToCardBorderColor, sponsorLevelToPinnedBgClass } from '../../../utils/color';
+import { aggregateHeatmap } from '../utils/heatmapAggregator';
+import { createMediaQueryEffect } from '../../../utils/mediaQuery';
+import { hasAnyAnnotation, hasAnyAnnotationInList } from '../utils/annotationUtils';
+import { getServiceIconComponent } from '../../../components/ServiceIcon';
+import type { ProcessedMonitorData, SortConfig } from '../../../types';
+
+type HistoryPoint = ProcessedMonitorData['history'][number];
+
+// 虚拟滚动常量
+const MOBILE_ROW_HEIGHT = 200;  // 移动端卡片高度（提升呼吸感：内容约 188px + 12px 间距）
+const MOBILE_MAX_HEIGHT = 800;  // 移动端列表最大高度
+
+// ServiceIcon 模块级缓存，避免重复调用 getServiceIconComponent
+const serviceIconCache = new Map<string, ReturnType<typeof getServiceIconComponent>>();
+const getCachedServiceIcon = (serviceType: string) => {
+  if (!serviceIconCache.has(serviceType)) {
+    serviceIconCache.set(serviceType, getServiceIconComponent(serviceType));
+  }
+  return serviceIconCache.get(serviceType);
+};
+
+// 通道单元格组件（带自定义 CSS tooltip，替代原生 title 属性）
+interface ChannelCellProps {
+  channel?: string;
+  probeUrl?: string;
+  templateName?: string;
+  coldReason?: string;
+  className?: string;
+}
+
+function ChannelCell({ channel, probeUrl, templateName, coldReason, className = '' }: ChannelCellProps) {
+  const { t } = useTranslation();
+  const channelType = parseChannelType(channel);
+  const hasTooltip = !!(channelType || probeUrl || templateName || coldReason);
+  const triggerRef = useRef<HTMLSpanElement>(null);
+  const leaveTimer = useRef<number>(0);
+  const [hover, setHover] = useState(false);
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
+
+  const updatePosition = useCallback(() => {
+    if (!triggerRef.current) return;
+    const rect = triggerRef.current.getBoundingClientRect();
+    setPos({ x: rect.left, y: rect.bottom });
+  }, []);
+
+  const handleEnter = useCallback(() => {
+    clearTimeout(leaveTimer.current);
+    updatePosition();
+    setHover(true);
+  }, [updatePosition]);
+
+  const handleLeave = useCallback(() => {
+    clearTimeout(leaveTimer.current);
+    leaveTimer.current = window.setTimeout(() => setHover(false), 100);
+  }, []);
+
+  // 卸载时清理定时器
+  useEffect(() => () => { clearTimeout(leaveTimer.current); }, []);
+
+  // tooltip 打开时跟随滚动/resize 更新位置
+  useEffect(() => {
+    if (!hover) return;
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition, true);
+    return () => {
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition, true);
+    };
+  }, [hover, updatePosition]);
+
+  const channelContent = (
+    <>
+      <ChannelTypeIcon channel={channel} />
+      <span className="min-w-0 truncate">{channel || '-'}</span>
+    </>
+  );
+
+  if (!hasTooltip) {
+    return <span className={`inline-flex items-center gap-1 ${className}`}>{channelContent}</span>;
+  }
+
+  return (
+    <span
+      ref={triggerRef}
+      className={`inline-flex items-center gap-1 cursor-help ${className}`}
+      onMouseEnter={handleEnter}
+      onMouseLeave={handleLeave}
+    >
+      {channelContent}
+      {/* Portal 到 body — 逃出 backdrop-filter 造成的 containing block */}
+      {hover && pos && createPortal(
+        <span
+          className="fixed px-2 py-1.5 bg-elevated border border-default text-xs rounded-lg shadow-lg z-50 select-text cursor-text md:min-w-[20rem] max-w-[90vw] md:max-w-2xl"
+          style={{ left: pos.x, top: pos.y }}
+          onMouseEnter={handleEnter}
+          onMouseLeave={handleLeave}
+        >
+          <span className="flex flex-col gap-1">
+            {channelType && (
+              <span className="flex flex-col">
+                <span className="text-muted text-[10px]">{t('table.channelTooltip.channelType')}</span>
+                <span className="text-primary text-[11px]">
+                  {t(`table.channelType.${channelType}`)} — {t(`table.channelType.${channelType}Desc`)}
+                </span>
+              </span>
+            )}
+            {probeUrl && (
+              <span className="flex flex-col">
+                <span className="text-muted text-[10px]">{t('table.channelTooltip.probeUrl')}</span>
+                <span className="text-primary font-mono text-[11px] break-all">{probeUrl}</span>
+              </span>
+            )}
+            {templateName && (
+              <span className="flex flex-col">
+                <span className="text-muted text-[10px]">{t('table.channelTooltip.template')}</span>
+                <span className="text-primary font-mono text-[11px] break-all">{templateName}</span>
+              </span>
+            )}
+            {coldReason && (
+              <span className="flex flex-col">
+                <span className="text-muted text-[10px]">{t('table.channelTooltip.coldReason', '冷板原因')}</span>
+                <span className="text-warning text-[11px] break-all">{coldReason}</span>
+              </span>
+            )}
+          </span>
+        </span>,
+        document.body,
+      )}
+    </span>
+  );
+}
+
+// ─── 模型列辅助函数 ───────────────────────────────────────────
+// (removed: model column no longer rendered)
+
+interface StatusTableProps {
+  data: ProcessedMonitorData[];
+  sortConfig: SortConfig;
+  isInitialSort?: boolean;   // 是否为初始排序状态（控制高亮显示）
+  timeRange: string;
+  slowLatencyMs: number;
+  enableAnnotations?: boolean;      // 注解系统总开关，默认 true
+  showCategoryTag?: boolean; // 是否显示分类标签（推荐/公益），默认 true
+  showProvider?: boolean;    // 是否显示服务商名称，默认 true
+  showSponsor?: boolean;     // 是否显示赞助者信息，默认 true
+  isFavorite: (id: string) => boolean;  // 检查是否已收藏
+  onToggleFavorite: (id: string) => void; // 切换收藏状态
+  onSort: (key: string) => void;
+  onBlockHover: (e: React.MouseEvent<HTMLDivElement>, point: HistoryPoint) => void;
+  onBlockLeave: () => void;
+  onFilterProvider?: (providerId: string) => void; // 按服务商筛选
+}
+
+// react-window v2 虚拟列表行组件（rowComponent 接口）
+interface MobileRowProps {
+  data: ProcessedMonitorData[];
+  slowLatencyMs: number;
+  enableAnnotations: boolean;
+  showProvider: boolean;
+  showSponsor: boolean;
+  useLatencyGradient: boolean;
+  isFavorite: (id: string) => boolean;
+  onToggleFavorite: (id: string) => void;
+  onBlockHover: (e: React.MouseEvent<HTMLDivElement>, point: HistoryPoint) => void;
+  onBlockLeave: () => void;
+}
+
+function MobileRow({ index, style, data, slowLatencyMs, enableAnnotations, showProvider, showSponsor, useLatencyGradient, isFavorite, onToggleFavorite, onBlockHover, onBlockLeave }: RowComponentProps<MobileRowProps>) {
+  const item = data[index];
+  return (
+    <div style={style}>
+      <div style={{ marginBottom: 12 }}>
+        <MobileListItem
+          item={item}
+          slowLatencyMs={slowLatencyMs}
+          enableAnnotations={enableAnnotations}
+          showProvider={showProvider}
+          showSponsor={showSponsor}
+          useLatencyGradient={useLatencyGradient}
+          isFavorite={isFavorite(item.id)}
+          onToggleFavorite={() => onToggleFavorite(item.id)}
+          onBlockHover={onBlockHover}
+          onBlockLeave={onBlockLeave}
+        />
+      </div>
+    </div>
+  );
+}
+
+// 移动端卡片列表项组件
+function MobileListItem({
+  item,
+  slowLatencyMs,
+  enableAnnotations = true,
+  showProvider = true,
+  showSponsor = true,
+  useLatencyGradient = false,
+  isFavorite,
+  onToggleFavorite,
+  onBlockHover,
+  onBlockLeave,
+}: {
+  item: ProcessedMonitorData;
+  slowLatencyMs: number;
+  enableAnnotations?: boolean;
+  showProvider?: boolean;
+  showSponsor?: boolean;
+  useLatencyGradient?: boolean;
+  isFavorite: boolean;
+  onToggleFavorite: () => void;
+  onBlockHover: (e: React.MouseEvent<HTMLDivElement>, point: HistoryPoint) => void;
+  onBlockLeave: () => void;
+}) {
+  const { i18n } = useTranslation();
+  const ServiceIcon = getCachedServiceIcon(item.serviceType);
+
+  // 聚合热力图数据
+  const aggregatedHistory = useMemo(
+    () => aggregateHeatmap(item.history, 30),
+    [item.history]
+  );
+
+  // 检查是否有注解需要显示
+  const hasItemAnnotations = hasAnyAnnotation(item, { enableAnnotations });
+
+  // 卡片左边框颜色（仅基于赞助级别，置顶改用背景色）
+  const borderColor = sponsorLevelToCardBorderColor(item.sponsorLevel);
+
+  // 是否显示左边框（仅基于赞助级别）
+  const hasLeftBorder = !!item.sponsorLevel;
+
+  // 置顶项使用对应注解颜色的极淡背景色
+  const pinnedBgClass = item.pinned ? sponsorLevelToPinnedBgClass(item.sponsorLevel) : '';
+  const baseBgClass = pinnedBgClass || 'bg-surface/60';
+
+  // 卡片最小高度 = 行高(200) - 行间距(12) = 188px
+  // 确保所有卡片高度一致，避免虚拟列表中间距不均
+  const cardMinHeight = 188;
+
+  return (
+    <div
+      className={`${baseBgClass} border border-default rounded-r-2xl ${hasLeftBorder ? 'rounded-l-sm border-l-2' : 'rounded-l-2xl'} p-4 space-y-3`}
+      style={{
+        ...(borderColor ? { borderLeftColor: borderColor } : {}),
+        minHeight: cardMinHeight,
+      }}
+    >
+      {/* 注解行 - 仅在有注解时显示 */}
+      {hasItemAnnotations && (
+        <AnnotationCell annotations={item.annotations} />
+      )}
+
+      {/* 主要信息行 */}
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          {/* 服务图标 */}
+          <div className="w-8 h-8 flex-shrink-0 rounded-2xl bg-elevated flex items-center justify-center border border-default text-primary">
+            {ServiceIcon ? (
+              <ServiceIcon className="w-4 h-4" />
+            ) : item.serviceType === 'cc' ? (
+              <Zap className="text-service-cc" size={14} />
+            ) : (
+              <Shield className="text-service-cx" size={14} />
+            )}
+          </div>
+
+          {/* 服务商名称 + 收藏按钮 */}
+          <div className="min-w-0 flex-1">
+            {showProvider && (
+              <div className="flex items-center gap-1.5">
+                <span className="font-semibold text-primary truncate text-sm leading-tight">
+                  <ExternalLink href={item.providerUrl} compact requireConfirm>{item.providerName}</ExternalLink>
+                </span>
+                <FavoriteButton
+                  isFavorite={isFavorite}
+                  onToggle={onToggleFavorite}
+                  size={12}
+                  inline
+                />
+              </div>
+            )}
+            <div className="flex items-center gap-2 mt-0.5 text-xs text-secondary">
+              {/* 赞助者（放在服务类型前） */}
+              {showSponsor && item.sponsor && (
+                <span className="text-[10px] text-muted truncate max-w-[80px]">
+                  <ExternalLink href={item.sponsorUrl} compact>{item.sponsor}</ExternalLink>
+                </span>
+              )}
+              <span
+                className={`px-1.5 py-0.5 rounded text-[10px] font-mono border flex-shrink-0 ${
+                  item.serviceType === 'cc'
+                    ? 'border-service-cc text-service-cc bg-service-cc'
+                    : item.serviceType === 'gm'
+                    ? 'border-service-gm text-service-gm bg-service-gm'
+                    : item.serviceType === 'dx'
+                    ? 'border-service-dx text-service-dx bg-service-dx'
+                    : 'border-service-cx text-service-cx bg-service-cx'
+                }`}
+              >
+                {item.serviceName.toUpperCase()}
+              </span>
+              {item.channel && (
+                <ChannelCell
+                  channel={item.channelName || item.channel}
+                  probeUrl={item.probeUrl}
+                  templateName={item.templateName}
+                  coldReason={item.coldReason}
+                  className="text-muted truncate"
+                />
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* 状态、可用率、时间和延迟 */}
+        <div className="flex flex-col items-end gap-1 flex-shrink-0">
+          <div className="flex items-center p-1.5 rounded-full bg-elevated border border-default">
+            <StatusDot status={item.currentStatus} size="sm" />
+          </div>
+          <span
+            className="text-sm font-mono font-bold"
+            style={{ color: availabilityToColor(item.uptime) }}
+          >
+            {item.uptime >= 0 ? `${item.uptime}%` : '--'}
+          </span>
+          {/* 时间和延迟（总是显示） */}
+          <div className="flex items-center gap-2 text-[10px] text-muted font-mono">
+            {item.lastCheckTimestamp && (
+              <span>
+                {new Date(item.lastCheckTimestamp * 1000).toLocaleString(i18n.language, {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </span>
+            )}
+            {item.lastCheckLatency !== undefined && (
+              <span style={{ color: item.currentStatus === 'UNAVAILABLE' ? 'hsl(var(--text-muted))' : latencyToColor(item.lastCheckLatency, item.slowLatencyMs ?? slowLatencyMs) }}>
+                {item.lastCheckLatency}ms
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* 热力图 */}
+      <div className="flex items-center gap-[2px] h-5 w-full overflow-hidden rounded-sm">
+        {aggregatedHistory.map((point, idx) => (
+          <HeatmapBlock
+            key={idx}
+            point={point}
+            width={`${100 / aggregatedHistory.length}%`}
+            height="h-full"
+            onHover={onBlockHover}
+            onLeave={onBlockLeave}
+            isMobile
+            useLatencyGradient={useLatencyGradient}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// 移动端排序菜单
+function MobileSortMenu({
+  sortConfig,
+  isInitialSort,
+  onSort,
+}: {
+  sortConfig: SortConfig;
+  isInitialSort?: boolean;
+  onSort: (key: string) => void;
+}) {
+  const { t } = useTranslation();
+
+  const sortOptions = [
+    { key: 'providerName', label: t('table.sorting.provider') },
+    { key: 'uptime', label: t('table.sorting.uptime') },
+    { key: 'lastCheck', label: t('table.sorting.lastCheck') },
+    { key: 'serviceType', label: t('table.sorting.service') },
+  ];
+
+  return (
+    <div className="flex items-center gap-2 mb-2 overflow-x-auto pb-2">
+      <span className="text-xs text-muted flex-shrink-0">{t('controls.sortBy')}</span>
+      {sortOptions.map((option) => {
+        // 初始状态下不高亮任何排序按钮
+        const isActive = !isInitialSort && sortConfig.key === option.key;
+        return (
+          <button
+            key={option.key}
+            onClick={() => onSort(option.key)}
+            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors flex-shrink-0 focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:outline-none ${
+              isActive
+                ? 'bg-accent/20 text-accent border border-accent/30'
+                : 'bg-elevated text-secondary border border-default hover:text-primary'
+            }`}
+          >
+            {option.label}
+            {isActive && (
+              sortConfig.direction === 'asc' ? (
+                <ArrowUp size={12} />
+              ) : (
+                <ArrowDown size={12} />
+              )
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function StatusTableComponent({
+  data,
+  sortConfig,
+  isInitialSort = false,
+  timeRange,
+  slowLatencyMs,
+  enableAnnotations = true,
+  showProvider = true,
+  showSponsor = true,
+  isFavorite,
+  onToggleFavorite,
+  onSort,
+  onBlockHover,
+  onBlockLeave,
+  onFilterProvider,
+}: StatusTableProps) {
+  const { t, i18n } = useTranslation();
+  const [isMobile, setIsMobile] = useState(false);
+
+  // 检测是否为平板/移动端（< 960px，兼容 Safari ≤13）
+  useEffect(() => {
+    const cleanup = createMediaQueryEffect('tablet', setIsMobile);
+    return cleanup;
+  }, []);
+
+  // 排序图标：初始状态下不显示高亮
+  const SortIcon = ({ columnKey }: { columnKey: string }) => {
+    // 初始状态下所有排序图标都不高亮
+    if (isInitialSort || sortConfig.key !== columnKey) {
+      return <ArrowUpDown size={14} className="opacity-30 ml-1" />;
+    }
+    return sortConfig.direction === 'asc' ? (
+      <ArrowUp size={14} className="text-accent ml-1" />
+    ) : (
+      <ArrowDown size={14} className="text-accent ml-1" />
+    );
+  };
+
+  const currentTimeRange = getTimeRanges(t).find((r) => r.id === timeRange);
+  const useLatencyGradient = timeRange === '90m';
+
+  // 移动端：虚拟滚动卡片列表视图
+  if (isMobile) {
+    // 计算虚拟列表高度（最大 MOBILE_MAX_HEIGHT，最小为所有项目高度）
+    const mobileListHeight = Math.min(
+      data.length * MOBILE_ROW_HEIGHT,
+      MOBILE_MAX_HEIGHT
+    );
+
+    return (
+      <div>
+        <MobileSortMenu sortConfig={sortConfig} isInitialSort={isInitialSort} onSort={onSort} />
+        <List
+          style={{ height: mobileListHeight, width: '100%' }}
+          rowCount={data.length}
+          rowHeight={MOBILE_ROW_HEIGHT}
+          overscanCount={3}
+          rowComponent={MobileRow}
+          rowProps={{ data, slowLatencyMs, enableAnnotations, showProvider, showSponsor, useLatencyGradient, isFavorite, onToggleFavorite, onBlockHover, onBlockLeave }}
+        />
+      </div>
+    );
+  }
+
+  // 检查是否有任何注解需要显示
+  const hasAnnotations = hasAnyAnnotationInList(data, { enableAnnotations });
+
+  // 桌面端：表格视图
+  return (
+    <div className="overflow-x-auto rounded-2xl border border-default/50 shadow-xl bg-surface/40 backdrop-blur-sm">
+      <table className="w-full text-left border-collapse bg-transparent">
+        <colgroup>
+          {hasAnnotations && <col className="w-px" />}
+          {showProvider && <col className="w-px" />}
+          <col className="w-px" />
+          <col className="w-px" />
+          <col className="w-px" />
+          <col className="w-px" />
+          <col className="w-full" />
+        </colgroup>
+        <thead>
+          <tr className="border-b border-default/50 text-secondary text-xs uppercase tracking-wider">
+            {/* 注解列 - 仅在有注解时显示 */}
+            {hasAnnotations && (
+              <th className="px-1 py-3 font-medium whitespace-nowrap">
+                {t('table.headers.annotation')}
+              </th>
+            )}
+            {/* 服务商列（合并赞助者） */}
+            {showProvider && (
+              <th
+                className="px-3 py-3 font-medium whitespace-nowrap cursor-pointer hover:text-accent transition-colors focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:outline-none"
+                onClick={() => onSort('providerName')}
+                onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onSort('providerName'))}
+                tabIndex={0}
+                role="button"
+              >
+                <div className="flex items-center">
+                  {t('table.headers.provider')} <SortIcon columnKey="providerName" />
+                </div>
+              </th>
+            )}
+            <th
+              className="px-2 py-3 font-medium whitespace-nowrap cursor-pointer hover:text-accent transition-colors focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:outline-none"
+              onClick={() => onSort('serviceType')}
+              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onSort('serviceType'))}
+              tabIndex={0}
+              role="button"
+            >
+              <div className="flex items-center">
+                {t('table.headers.service')} <SortIcon columnKey="serviceType" />
+              </div>
+            </th>
+            <th
+              className="px-2 py-3 font-medium whitespace-nowrap cursor-pointer hover:text-accent transition-colors focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:outline-none"
+              onClick={() => onSort('channel')}
+              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onSort('channel'))}
+              tabIndex={0}
+              role="button"
+            >
+              <div className="flex items-center">
+                {t('table.headers.channel')} <SortIcon columnKey="channel" />
+              </div>
+            </th>
+            <th
+              className="px-2 py-3 font-medium whitespace-nowrap cursor-pointer hover:text-accent transition-colors focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:outline-none"
+              onClick={() => onSort('uptime')}
+              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onSort('uptime'))}
+              tabIndex={0}
+              role="button"
+            >
+              <div className="flex items-center">
+                {t('table.headers.uptime')} <SortIcon columnKey="uptime" />
+              </div>
+            </th>
+            <th
+              className="px-2 py-3 font-medium whitespace-nowrap cursor-pointer hover:text-accent transition-colors focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:outline-none"
+              onClick={() => onSort('lastCheck')}
+              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onSort('lastCheck'))}
+              tabIndex={0}
+              role="button"
+            >
+              <div className="flex items-center">
+                <div className="flex flex-col leading-tight">
+                  <span>{t('table.headers.lastCheckLine1')}</span>
+                  <span className="text-[10px] opacity-50 font-normal">{t('table.headers.lastCheckLine2')}</span>
+                </div>
+                <SortIcon columnKey="lastCheck" />
+              </div>
+            </th>
+            <th className="pl-2 pr-4 py-3 font-medium min-w-[260px]">
+              <div className="flex items-center gap-2">
+                {t('table.headers.trend')}
+                <span className="text-[10px] normal-case opacity-50 border border-default px-1 rounded">
+                  {currentTimeRange?.label}
+                </span>
+              </div>
+            </th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-default/50 text-sm">
+          {data.map((item, rowIndex) => {
+            const ServiceIcon = getCachedServiceIcon(item.serviceType);
+            const hasItemAnnotations = hasAnyAnnotation(item, { enableAnnotations });
+            const pinnedBg = item.pinned ? sponsorLevelToPinnedBgClass(item.sponsorLevel) : '';
+            return (
+            <tr
+              key={item.id}
+              className={`group hover:bg-elevated/40 transition-[background-color,color] ${pinnedBg} ${sponsorLevelToBorderClass(item.sponsorLevel)}`}
+            >
+              {/* 注解列 */}
+              {hasAnnotations && (
+                <td className="px-1 py-1 whitespace-nowrap">
+                  {hasItemAnnotations ? (
+                    <AnnotationCell
+                      annotations={item.annotations}
+                      tooltipPlacement={rowIndex === 0 ? 'bottom' : 'top'}
+                    />
+                  ) : null}
+                </td>
+              )}
+              {/* 服务商列（两行紧贴，整体垂直居中） */}
+              {showProvider && (
+                <td className="px-2 py-1.5">
+                  <div className="flex items-center h-8 group/provider">
+                    <div className="flex flex-col gap-0 flex-1 min-w-0 max-w-[13rem]">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-medium text-primary text-sm leading-tight truncate">
+                          <ExternalLink href={item.providerUrl} inline requireConfirm>{item.providerName}</ExternalLink>
+                        </span>
+                        {/* 收藏按钮：始终显示，未收藏时弱化 */}
+                        <div className="flex-shrink-0">
+                          <FavoriteButton
+                            isFavorite={isFavorite(item.id)}
+                            onToggle={() => onToggleFavorite(item.id)}
+                            size={12}
+                            inline
+                          />
+                        </div>
+                        {/* 过滤按钮：悬浮时显示 */}
+                        {onFilterProvider && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onFilterProvider(item.providerId);
+                            }}
+                            className="flex-shrink-0 p-0.5 rounded opacity-0 group-hover/provider:opacity-60 hover:!opacity-100 hover:text-accent transition-opacity cursor-pointer"
+                            title={t('table.filterByProvider')}
+                          >
+                            <Filter size={10} />
+                          </button>
+                        )}
+                      </div>
+                      {showSponsor && item.sponsor && (
+                        <span className="text-[9px] text-muted leading-none">
+                          <ExternalLink href={item.sponsorUrl} inline>{item.sponsor}</ExternalLink>
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </td>
+              )}
+              <td className="px-2 py-1">
+                <span
+                  className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-mono border ${
+                    item.serviceType === 'cc'
+                      ? 'border-service-cc text-service-cc bg-service-cc'
+                      : item.serviceType === 'gm'
+                      ? 'border-service-gm text-service-gm bg-service-gm'
+                      : item.serviceType === 'dx'
+                      ? 'border-service-dx text-service-dx bg-service-dx'
+                      : 'border-service-cx text-service-cx bg-service-cx'
+                  }`}
+                >
+                  {ServiceIcon ? (
+                    <ServiceIcon className="w-3.5 h-3.5 mr-1 text-primary" />
+                  ) : (
+                    <>
+                      {item.serviceType === 'cc' && <Zap size={10} className="mr-1 text-primary" />}
+                      {item.serviceType === 'cx' && <Shield size={10} className="mr-1 text-primary" />}
+                    </>
+                  )}
+                  {item.serviceName.toUpperCase()}
+                </span>
+              </td>
+              <td className="px-2 py-1 text-secondary text-xs">
+                <ChannelCell
+                  channel={item.channelName || item.channel}
+                  probeUrl={item.probeUrl}
+                  templateName={item.templateName}
+                  coldReason={item.coldReason}
+                  className="max-w-[10rem]"
+                />
+              </td>
+              <td className="px-2 py-1 font-mono font-bold whitespace-nowrap">
+                <span style={{ color: availabilityToColor(item.uptime) }}>
+                  {item.uptime >= 0 ? `${item.uptime}%` : '--'}
+                </span>
+              </td>
+              <td className="px-2 py-1">
+                <div className="flex items-center gap-1.5">
+                  <StatusDot status={item.currentStatus} size="sm" />
+                  {item.lastCheckTimestamp ? (
+                    <div className="text-xs text-secondary font-mono flex flex-col gap-0.5">
+                      {item.lastCheckLatency !== undefined && (
+                        <span
+                          className="text-[10px] font-mono"
+                          style={{ color: item.currentStatus === 'UNAVAILABLE' ? 'hsl(var(--text-muted))' : latencyToColor(item.lastCheckLatency, item.slowLatencyMs ?? slowLatencyMs) }}
+                        >
+                          {item.lastCheckLatency}ms
+                        </span>
+                      )}
+                      <span className="text-[10px] text-muted">{new Date(item.lastCheckTimestamp * 1000).toLocaleString(i18n.language, { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                  ) : (
+                    <span className="text-muted text-xs">-</span>
+                  )}
+                </div>
+              </td>
+              <td className="pl-2 pr-4 py-1.5 align-middle">
+                <div className="flex items-center gap-[2px] h-5 w-full overflow-hidden rounded-sm">
+                  {/* 热力图：多层 vs 单层 */}
+                  {item.isMultiModel && item.layers ? (
+                    // Phase B: 多层垂直堆叠热力图
+                    item.history.map((_, idx) => (
+                      <LayeredHeatmapBlock
+                        key={idx}
+                        layers={item.layers!}
+                        timeIndex={idx}
+                        width={`${100 / item.history.length}%`}
+                        height="h-full"
+                        onHover={onBlockHover}
+                        onLeave={onBlockLeave}
+                        isMobile={false}
+                        slowLatencyMs={item.slowLatencyMs ?? slowLatencyMs}
+                        useLatencyGradient={useLatencyGradient}
+                      />
+                    ))
+                  ) : (
+                    // Phase A: 单层传统热力图
+                    item.history.map((point, idx) => (
+                      <HeatmapBlock
+                        key={idx}
+                        point={point}
+                        width={`${100 / item.history.length}%`}
+                        height="h-full"
+                        onHover={onBlockHover}
+                        onLeave={onBlockLeave}
+                        isMobile={false}
+                        useLatencyGradient={useLatencyGradient}
+                      />
+                    ))
+                  )}
+                </div>
+              </td>
+            </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+export const StatusTable = memo(StatusTableComponent);

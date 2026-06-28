@@ -18,8 +18,10 @@
 ### 必需工具
 
 ```bash
-# Go 1.24+
+# 主服务 Go 1.25+
 go version
+
+# notifier/ 独立模块 Go 1.24+
 
 # pre-commit (代码提交检查)
 pip install pre-commit
@@ -101,6 +103,7 @@ npm run preview       # 预览生产构建
 .
 ├── cmd/server/main.go      # 程序入口
 ├── internal/               # 内部包（不对外暴露）
+│   ├── app/               # 主服务装配、热更新和生命周期
 │   ├── config/            # 配置管理
 │   │   ├── config.go      # 数据结构和验证
 │   │   ├── loader.go      # 配置加载
@@ -111,13 +114,25 @@ npm run preview       # 预览生产构建
 │   ├── monitor/           # 监测探测
 │   │   ├── client.go      # HTTP 客户端池
 │   │   └── probe.go       # 探测逻辑
+│   ├── inlineprobe/       # 管理后台/自助收录即时探测
 │   ├── scheduler/         # 调度器
 │   │   └── scheduler.go   # 定时任务调度
 │   └── api/               # HTTP API
 │       ├── handler.go     # 请求处理
-│       └── server.go      # 服务器
+│       ├── server.go      # 服务器装配
+│       ├── router_*.go    # 路由注册
+│       └── static.go      # 前端静态资源
 ├── scripts/               # 工具脚本
 ├── docs/                  # 项目文档
+├── frontend/src/          # 前端源码
+│   ├── features/
+│   │   ├── status/        # 状态页组件、hooks 和状态页专属 utils
+│   │   └── admin/         # 管理后台组件和 hooks
+│   ├── components/        # 跨页面通用组件
+│   ├── hooks/             # 跨页面通用 hooks
+│   ├── types/             # 前端共享类型
+│   └── utils/             # 跨页面通用工具
+├── config/examples/       # 配置示例
 ├── config.yaml            # 运行配置
 └── config.yaml.example    # 配置示例
 ```
@@ -128,7 +143,9 @@ npm run preview       # 预览生产构建
 |-----|------|----------|
 | Config | 配置加载、验证、热更新 | `internal/config/*.go` |
 | Storage | 数据持久化（SQLite） | `internal/storage/*.go` |
+| App | 主服务装配、生命周期、热更新编排 | `internal/app/*.go` |
 | Monitor | HTTP 探测、客户端池 | `internal/monitor/*.go` |
+| InlineProbe | 管理后台和自助收录即时探测 | `internal/inlineprobe/*.go` |
 | Scheduler | 定时调度、并发控制 | `internal/scheduler/*.go` |
 | API | RESTful 接口 | `internal/api/*.go` |
 

@@ -351,6 +351,7 @@ export function heatmapBlockToStyle(point: HeatmapPoint, useLatencyGradient = fa
  * Sakrylle 主题：禁用所有赞助等级左边框装饰，统一返回空字符串。
  */
 export function sponsorLevelToBorderClass(_level?: string): string {
+  void _level;
   return '';
 }
 
@@ -360,6 +361,7 @@ export function sponsorLevelToBorderClass(_level?: string): string {
  * Sakrylle 主题：禁用所有赞助等级左边框装饰，统一返回 undefined。
  */
 export function sponsorLevelToCardBorderColor(_level?: string): string | undefined {
+  void _level;
   return undefined;
 }
 
@@ -369,5 +371,6 @@ export function sponsorLevelToCardBorderColor(_level?: string): string | undefin
  * Sakrylle 主题：禁用所有赞助等级置顶背景色，统一返回空字符串。
  */
 export function sponsorLevelToPinnedBgClass(_level?: string): string {
+  void _level;
   return '';
 }

@@ -2,13 +2,9 @@ package api
 
 import (
 	"context"
-	"embed"
 	"fmt"
-	"io/fs"
-	"mime"
 	"net/http"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -18,14 +14,10 @@ import (
 	"github.com/google/uuid"
 
 	"monitor/internal/automove"
-	"monitor/internal/buildinfo"
 	"monitor/internal/config"
 	"monitor/internal/logger"
 	"monitor/internal/storage"
 )
-
-//go:embed frontend/dist
-var frontendFS embed.FS
 
 // Server HTTP服务器
 type Server struct {
@@ -152,90 +144,14 @@ func NewServer(store storage.Storage, cfg *config.AppConfig, port string, autoMo
 	// 创建处理器
 	handler := NewHandler(store, cfg, autoMover)
 
-	// 注册 API 路由
-	router.GET("/api/status", handler.GetStatus)
-	router.GET("/api/status/query", handler.GetStatusQuery)
-	router.POST("/api/status/batch", handler.PostStatusBatch)
-
-	// 事件 API 路由
-	router.GET("/api/events", handler.GetEvents)
-	router.GET("/api/events/latest", handler.GetLatestEventID)
-
-	// 自助收录 API 路由
-	router.GET("/api/onboarding/meta", handler.GetOnboardingMeta)
-	router.POST("/api/onboarding/test", handler.OnboardingTest)
-	router.POST("/api/onboarding/submit", handler.SubmitOnboarding)
-	router.GET("/api/onboarding/:id", handler.GetOnboardingStatus)
-
-	// 管理后台 API 路由（需 Bearer token 鉴权）
-	router.GET("/api/admin/submissions", handler.AdminListSubmissions)
-	router.GET("/api/admin/submissions/:id", handler.AdminGetSubmission)
-	router.PUT("/api/admin/submissions/:id", handler.AdminUpdateSubmission)
-	router.DELETE("/api/admin/submissions/:id", handler.AdminDeleteSubmission)
-	router.POST("/api/admin/submissions/:id/test", handler.AdminTestSubmission)
-	router.POST("/api/admin/submissions/:id/reject", handler.AdminRejectSubmission)
-	router.POST("/api/admin/submissions/:id/publish", handler.AdminPublishSubmission)
-
-	// 变更请求 API 路由
-	router.POST("/api/change/auth", handler.AuthChange)
-	router.POST("/api/change/submit", handler.SubmitChange)
-	router.GET("/api/change/:id", handler.GetChangeStatus)
-
-	// 管理后台 — 变更请求 API（需 Bearer token 鉴权）
-	router.GET("/api/admin/changes", handler.AdminListChanges)
-	router.GET("/api/admin/changes/:id", handler.AdminGetChange)
-	router.PUT("/api/admin/changes/:id", handler.AdminUpdateChange)
-	router.POST("/api/admin/changes/:id/approve", handler.AdminApproveChange)
-	router.POST("/api/admin/changes/:id/reject", handler.AdminRejectChange)
-	router.POST("/api/admin/changes/:id/apply", handler.AdminApplyChange)
-	router.DELETE("/api/admin/changes/:id", handler.AdminDeleteChange)
-
-	// 管理后台 — monitors.d/ CRUD API（需 Bearer token 鉴权）
-	router.GET("/api/admin/templates", handler.AdminListTemplates)
-	router.GET("/api/admin/monitors", handler.AdminListMonitors)
-	router.GET("/api/admin/monitors/:key", handler.AdminGetMonitor)
-	router.POST("/api/admin/monitors", handler.AdminCreateMonitor)
-	router.PUT("/api/admin/monitors/:key", handler.AdminUpdateMonitor)
-	router.DELETE("/api/admin/monitors/:key", handler.AdminDeleteMonitor)
-	router.POST("/api/admin/monitors/:key/toggle", handler.AdminToggleMonitor)
-	router.POST("/api/admin/monitors/:key/probe", handler.AdminProbeMonitor)
-	router.GET("/api/admin/monitors/:key/logs", handler.AdminGetMonitorLogs)
-
-	// SEO 路由
-	router.GET("/sitemap.xml", handler.GetSitemap)
-	router.GET("/robots.txt", handler.GetRobots)
-
-	// 版本信息 API
-	router.GET("/api/version", func(c *gin.Context) {
-		c.Header("Cache-Control", "no-store")
-		c.JSON(http.StatusOK, gin.H{
-			"version":    buildinfo.GetVersion(),
-			"git_commit": buildinfo.GetGitCommit(),
-			"build_time": buildinfo.GetBuildTime(),
-			"go_version": buildinfo.GetGoVersion(),
-		})
-	})
-
-	// 健康检查（支持 GET 和 HEAD）— 存活探针（liveness）
-	healthHandler := func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"status": "ok"})
-	}
-	router.GET("/health", healthHandler)
-	router.HEAD("/health", healthHandler)
-
-	// 就绪探针（readiness）— 检查存储连通性
-	readyHandler := func(c *gin.Context) {
-		ctx, cancel := context.WithTimeout(c.Request.Context(), 3*time.Second)
-		defer cancel()
-		if err := store.WithContext(ctx).Ping(); err != nil {
-			logger.Warn("api", "readiness check failed", "error", err)
-			apiError(c, http.StatusServiceUnavailable, ErrCodeServiceUnavailable, "storage not ready")
-			return
-		}
-		c.JSON(http.StatusOK, gin.H{"status": "ok"})
-	}
-	router.GET("/ready", readyHandler)
-	router.HEAD("/ready", readyHandler)
+	registerPublicAPIRoutes(router, handler)
+	registerAdminSubmissionRoutes(router, handler)
+	registerChangeRoutes(router, handler)
+	registerAdminChangeRoutes(router, handler)
+	registerAdminMonitorRoutes(router, handler)
+	registerSEORoutes(router, handler)
+	registerVersionRoute(router)
+	registerHealthRoutes(router, store)
 
 	// 静态文件服务（前端）- 传递 handler 以支持动态 Meta 注入
 	setupStaticFiles(router, handler)
@@ -295,113 +211,4 @@ func (s *Server) GetHandler() *Handler {
 func (s *Server) RegisterAnnouncementsHandler(handler gin.HandlerFunc) {
 	s.router.GET("/api/announcements", handler)
 	logger.Info("api", "公告 API 已注册", "path", "/api/announcements")
-}
-
-// setupStaticFiles 设置静态文件服务（前端）
-func setupStaticFiles(router *gin.Engine, handler *Handler) {
-	// 获取嵌入的前端文件系统
-	distFS, err := fs.Sub(frontendFS, "frontend/dist")
-	if err != nil {
-		logger.Warn("api", "无法加载前端文件系统", "error", err)
-		return
-	}
-
-	// 获取 assets 子目录文件系统
-	// StaticFS("/assets", ...) 会将 /assets/file.js 映射到文件系统根目录的 file.js
-	// 所以需要创建一个子文件系统指向 assets 目录
-	assetsFS, err := fs.Sub(distFS, "assets")
-	if err != nil {
-		logger.Warn("api", "无法加载 assets 文件系统", "error", err)
-		return
-	}
-
-	// 静态资源路径（CSS、JS等）
-	router.StaticFS("/assets", http.FS(assetsFS))
-
-	// vite.svg 等根目录静态文件
-	router.GET("/vite.svg", func(c *gin.Context) {
-		data, err := fs.ReadFile(distFS, "vite.svg")
-		if err != nil {
-			c.Status(http.StatusNotFound)
-			return
-		}
-		c.Data(http.StatusOK, "image/svg+xml", data)
-	})
-
-	// SPA 路由回退 - 所有未匹配的路由返回 index.html
-	router.NoRoute(func(c *gin.Context) {
-		path := c.Request.URL.Path
-
-		// API 路径返回 404
-		if strings.HasPrefix(path, "/api/") {
-			apiError(c, http.StatusNotFound, ErrCodeNotFound, "API 接口不存在")
-			return
-		}
-
-		// 静态资源缺失直接返回 404，避免 SPA 回退导致 MIME 类型错误
-		// 当 /assets/ 下的文件不存在时，StaticFS 不处理，请求会落入 NoRoute
-		// 如果回退到 index.html，浏览器会因为 MIME 类型是 text/html 而报错
-		if strings.HasPrefix(path, "/assets/") {
-			c.Status(http.StatusNotFound)
-			return
-		}
-
-		// 尝试从 embed FS 读取静态文件（favicon.svg、manifest.json 等）
-		// 移除所有前导斜杠（Nginx 代理可能产生 //favicon.svg）
-		filePath := strings.TrimLeft(path, "/")
-		filePath = filepath.Clean(filePath)
-
-		// 空路径或 "." 返回 index.html
-		if filePath == "." || filePath == "" {
-			filePath = "index.html"
-		}
-
-		// 防止路径穿越攻击
-		if strings.Contains(filePath, "..") {
-			logger.Warn("api", "路径穿越尝试", "path", path)
-			c.Status(http.StatusBadRequest)
-			return
-		}
-
-		// 尝试打开文件
-		if file, err := distFS.Open(filePath); err == nil {
-			defer file.Close()
-			info, _ := file.Stat()
-
-			// 根据文件扩展名确定 MIME 类型
-			mimeType := mime.TypeByExtension(filepath.Ext(filePath))
-			if mimeType == "" {
-				mimeType = "application/octet-stream"
-			}
-
-			// 特殊处理: index.html 需要走 Meta 注入逻辑，不直接返回
-			if filePath == "index.html" {
-				// 不直接返回，让它进入后面的 Meta 注入逻辑
-			} else {
-				c.DataFromReader(http.StatusOK, info.Size(), mimeType, file, nil)
-				return
-			}
-		}
-
-		// 文件不存在，回退到 index.html（SPA 路由）
-		data, err := fs.ReadFile(distFS, "index.html")
-		if err != nil {
-			c.String(http.StatusInternalServerError, "Failed to load frontend")
-			return
-		}
-
-		// 动态注入 Meta 标签（SEO 优化）
-		handler.cfgMu.RLock()
-		cfg := handler.config
-		handler.cfgMu.RUnlock()
-
-		html, isNotFound := injectMetaTags(string(data), path, cfg)
-
-		// 如果是 404（provider 不存在），返回 404 状态码
-		if isNotFound {
-			c.Data(http.StatusNotFound, "text/html; charset=utf-8", []byte(html))
-		} else {
-			c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(html))
-		}
-	})
 }

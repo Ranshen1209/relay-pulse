@@ -6,8 +6,8 @@ import (
 
 	"monitor/internal/apikey"
 	"monitor/internal/config"
+	"monitor/internal/inlineprobe"
 	"monitor/internal/logger"
-	"monitor/internal/probe"
 )
 
 // AuthIndex 运行时 API Key 指纹索引。
@@ -79,7 +79,7 @@ func (ai *AuthIndex) Rebuild(monitors []config.ServiceConfig, cipher *apikey.Key
 		// 填充测试元数据（从 probe 注册表查询）
 		candidate.TestType = m.Service
 		candidate.TestTypeName = m.Service
-		if tt, ok := probe.GetTestType(m.Service); ok {
+		if tt, ok := inlineprobe.GetTestType(m.Service); ok {
 			candidate.TestType = tt.ID
 			candidate.TestTypeName = tt.Name
 			candidate.DefaultTestVariant = tt.DefaultVariant

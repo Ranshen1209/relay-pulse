@@ -193,7 +193,7 @@ func TestGetMetaContent(t *testing.T) {
 			slug:              "",
 			providerName:      "",
 			isProviderPage:    false,
-			expectedTitlePart: "RelayPulse - 实时监测API中转服务可用性矩阵",
+			expectedTitlePart: "Sakrylle Status - 实时监测API中转服务可用性矩阵",
 			expectedDescPart:  "实时监测全球 LLM 中转服务",
 		},
 		{
@@ -202,7 +202,7 @@ func TestGetMetaContent(t *testing.T) {
 			slug:              "",
 			providerName:      "",
 			isProviderPage:    false,
-			expectedTitlePart: "RelayPulse - Real-time availability matrix",
+			expectedTitlePart: "Sakrylle Status - Real-time availability matrix",
 			expectedDescPart:  "Real-time monitoring of LLM relay",
 		},
 		{
@@ -418,7 +418,7 @@ func TestInjectMetaTags(t *testing.T) {
 			name:               "中文首页",
 			path:               "/",
 			expectedLang:       "zh-CN",
-			expectedTitlePart:  "RelayPulse - 实时监测",
+			expectedTitlePart:  "Sakrylle Status - 实时监测",
 			expectedIsNotFound: false,
 		},
 		{

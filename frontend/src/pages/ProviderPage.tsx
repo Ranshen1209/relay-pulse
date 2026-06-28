@@ -3,17 +3,17 @@ import { useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { Server } from 'lucide-react';
-import { useMonitorData } from '../hooks/useMonitorData';
-import { useFavorites } from '../hooks/useFavorites';
+import { useMonitorData } from '../features/status/hooks/useMonitorData';
+import { useFavorites } from '../features/status/hooks/useFavorites';
 import { useSeoMeta } from '../hooks/useSeoMeta';
 import { Header } from '../components/Header';
-import { Controls } from '../components/Controls';
-import { StatusTable } from '../components/StatusTable';
-import { StatusCard } from '../components/StatusCard';
+import { Controls } from '../features/status/components/Controls';
+import { StatusTable } from '../features/status/components/StatusTable';
+import { StatusCard } from '../features/status/components/StatusCard';
 import { Tooltip } from '../components/Tooltip';
 import { EmptyFavorites } from '../components/EmptyFavorites';
 import { createMediaQueryEffect } from '../utils/mediaQuery';
-import { canonicalize } from '../utils/monitorDataProcessor';
+import { canonicalize } from '../features/status/utils/monitorDataProcessor';
 import type { ViewMode, SortConfig, TooltipState, ProcessedMonitorData, ChannelOption, BoardFilter } from '../types';
 
 // localStorage key for time align preference (shared with App.tsx)

@@ -1301,6 +1301,15 @@ WHERE timestamp < strftime('%s', 'now', '-30 days');
 - **说明**: 引用 `templates/` 目录下的 JSON 模板文件（不含扩展名），定义完整的请求方式（url/method/headers/body/success_contains）
 - **示例**: `"cx-codex-arith"`、`"cc-haiku-arith"`、`"gm-flash-arith"`
 
+###### Sakrylle 生产模板注意事项
+
+以下模板承载的是生产探针语义，不只是请求格式封装。调整前应先确认真实计费链路、响应形态和探针成本：
+
+- `cc-haiku-openai-chat`：用于经 OpenAI-compatible `/v1/chat/completions` 路径探测 Claude Haiku。Sakrylle 的 `claude-kiro-special` 不应改回原生 Claude `/v1/messages` 算术模板，否则可能出现 HTTP 200 但未进入真实计费链路的静默假阳性。
+- `gk-grok-openai-chat`、`ag-flash-openai-chat`：用于 Grok / Agnes 逆向端点，采用 envelope 校验，即 `success_contains: "{{MODEL}}"` 匹配响应中回显的模型 ID。不要改成算术答案校验，因为这类端点的正文不稳定或不可读。
+- `dx-flash-openai-chat`：用于 Deepseek 官方 OpenAI 路径，`max_tokens: 8` 用来控制 thinking-token 成本。不要为了“更完整回答”随意调高输出 token。
+- `ag-flash-openai-chat` 当前可没有生产 monitor 引用，但模板保留用于未来恢复和减少上游同步冲突。没有配置引用不代表应删除。
+
 ##### `method`（传统模式必填，模板模式可选）
 - **类型**: string
 - **说明**: HTTP 请求方法（使用模板时由模板提供，可显式覆盖）
@@ -2328,7 +2337,8 @@ config.yaml                # 本地开发配置
 .env.local                 # 本地 API Keys（添加到 .gitignore）
 
 # 生产环境
-config.production.yaml     # 生产配置（不含敏感信息）
+config/examples/production.yaml.example  # 生产配置示例（不含敏感信息）
+config/config.yaml                       # 实际生产配置（本地或部署环境维护）
 .env                       # 生产 API Keys（添加到 .gitignore）
 ```
 

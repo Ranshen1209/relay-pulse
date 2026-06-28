@@ -14,8 +14,8 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"monitor/internal/config"
+	"monitor/internal/inlineprobe"
 	"monitor/internal/logger"
-	"monitor/internal/probe"
 	"monitor/internal/storage"
 )
 
@@ -559,7 +559,7 @@ func (h *Handler) AdminProbeMonitor(c *gin.Context) {
 	// 应用 base_url / api_key 覆盖（用于"编辑未保存"场景）
 	if v := strings.TrimSpace(req.BaseURL); v != "" {
 		// 覆盖参数源自管理员输入，必须过 SSRF 守卫（与 OnboardingTest 一致）
-		if err := probe.NewSSRFGuard().ValidateURL(v); err != nil {
+		if err := inlineprobe.NewSSRFGuard().ValidateURL(v); err != nil {
 			apiError(c, http.StatusBadRequest, ErrCodeInvalidParam, "base_url 安全校验失败: "+err.Error())
 			return
 		}

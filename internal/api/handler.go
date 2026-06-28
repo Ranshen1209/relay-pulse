@@ -16,9 +16,9 @@ import (
 	"monitor/internal/automove"
 	"monitor/internal/change"
 	"monitor/internal/config"
+	"monitor/internal/inlineprobe"
 	"monitor/internal/logger"
 	"monitor/internal/onboarding"
-	"monitor/internal/probe"
 	"monitor/internal/storage"
 )
 
@@ -242,16 +242,16 @@ func (c *statusCache) loadWithTTL(key string, ttl time.Duration, loader func() (
 type Handler struct {
 	storage       storage.Storage
 	config        *config.AppConfig
-	cfgMu         sync.RWMutex         // 保护config的并发访问
-	cache         *statusCache         // API 响应缓存
-	autoMover     *automove.Service    // 自动移板服务（可选）
-	inlineProber  *probe.InlineProber  // 内联探测器
-	probeLimiter  *probe.IPLimiter     // 公共探测端点限流
-	onboardingMu  sync.RWMutex         // 保护 onboardingSvc 热替换
-	onboardingSvc *onboarding.Service  // 自助收录服务（可选）
-	changeMu      sync.RWMutex         // 保护 changeSvc 热替换
-	changeSvc     *change.Service      // 变更请求服务（可选）
-	monitorStore  *config.MonitorStore // monitors.d/ CRUD（可选）
+	cfgMu         sync.RWMutex              // 保护config的并发访问
+	cache         *statusCache              // API 响应缓存
+	autoMover     *automove.Service         // 自动移板服务（可选）
+	inlineProber  *inlineprobe.InlineProber // 内联探测器
+	probeLimiter  *inlineprobe.IPLimiter    // 公共探测端点限流
+	onboardingMu  sync.RWMutex              // 保护 onboardingSvc 热替换
+	onboardingSvc *onboarding.Service       // 自助收录服务（可选）
+	changeMu      sync.RWMutex              // 保护 changeSvc 热替换
+	changeSvc     *change.Service           // 变更请求服务（可选）
+	monitorStore  *config.MonitorStore      // monitors.d/ CRUD（可选）
 }
 
 // NewHandler 创建处理器
@@ -265,12 +265,12 @@ func NewHandler(store storage.Storage, cfg *config.AppConfig, autoMover *automov
 }
 
 // SetInlineProber 设置内联探测器。
-func (h *Handler) SetInlineProber(p *probe.InlineProber) {
+func (h *Handler) SetInlineProber(p *inlineprobe.InlineProber) {
 	h.inlineProber = p
 }
 
 // SetProbeLimiter 设置公共探测端点限流器。
-func (h *Handler) SetProbeLimiter(l *probe.IPLimiter) {
+func (h *Handler) SetProbeLimiter(l *inlineprobe.IPLimiter) {
 	h.probeLimiter = l
 }
 
