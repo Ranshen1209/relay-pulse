@@ -76,7 +76,7 @@ function StatusCardComponent({
 
   return (
     <div
-      className={`group relative ${baseBgClass} border border-default hover:border-accent/30 ${hasLeftBorder ? 'rounded-l-sm border-l-2' : 'rounded-l-2xl'} rounded-r-2xl p-5 sm:p-6 transition-all duration-300 hover:shadow-accent-lg backdrop-blur-sm overflow-hidden`}
+      className={`group relative flex h-full flex-col ${baseBgClass} border border-default hover:border-accent/30 ${hasLeftBorder ? 'rounded-l-sm border-l-2' : 'rounded-l-2xl'} rounded-r-2xl p-5 sm:p-6 transition-all duration-300 hover:shadow-accent-lg backdrop-blur-sm overflow-hidden`}
       style={borderColor ? { borderLeftColor: borderColor } : undefined}
     >
       {/* 注解行 - 仅在有注解时显示 */}
@@ -166,7 +166,7 @@ function StatusCardComponent({
       </div>
 
       {/* 热力图 */}
-      <div>
+      <div className="mt-auto">
         <div className="flex justify-between text-xs text-muted mb-2">
           <span className="flex items-center gap-1">
             <Clock size={12} /> {currentTimeRange?.label || timeRange}
