@@ -1,6 +1,6 @@
 # Sakrylle Status — Production config
 #
-# Probes Sakrylle API (sub.sakrylle.com) on behalf of users.
+# Probes Sakrylle API on behalf of users; public links point to ai1.sakrylle.com.
 # 3 monitors mirror the live token-billed groups in sub2api.
 # Excludes all Claude groups and the 3 image groups: GPT-Image (5),
 # GPT-Image-2-4K (11), and GPT-Image-2-Async (21).
@@ -26,13 +26,13 @@ storage:
 monitors:
   # --- GPT-Pro: gpt-5.4-mini cheap probe, 号池 @ 0.5x ---
   - provider: sakrylle
-    provider_name: Sakrylle API
-    provider_url: https://sub.sakrylle.com
+    provider_name: Sakrylle
+    provider_url: https://ai1.sakrylle.com
     service: cx
     service_name: GPT
     category: commercial
     sponsor: Sakrylle
-    sponsor_url: https://sub.sakrylle.com
+    sponsor_url: https://ai1.sakrylle.com
     sponsor_level: core
     key_type: official
     channel: gpt-pro
@@ -45,13 +45,13 @@ monitors:
 
   # --- GPT-Pro-Special: 旧 GPT-Pro 重命名，特惠 @ 0.4x ---
   - provider: sakrylle
-    provider_name: Sakrylle API
-    provider_url: https://sub.sakrylle.com
+    provider_name: Sakrylle
+    provider_url: https://ai1.sakrylle.com
     service: cx
     service_name: GPT
     category: commercial
     sponsor: Sakrylle
-    sponsor_url: https://sub.sakrylle.com
+    sponsor_url: https://ai1.sakrylle.com
     sponsor_level: core
     key_type: official
     channel: gpt-pro-special
@@ -64,13 +64,13 @@ monitors:
 
   # --- DeepSeek: deepseek-v4-flash via Anthropic 官方直连 @ 1.0x ---
   - provider: sakrylle
-    provider_name: Sakrylle API
-    provider_url: https://sub.sakrylle.com
+    provider_name: Sakrylle
+    provider_url: https://ai1.sakrylle.com
     service: dx
     service_name: DeepSeek
     category: commercial
     sponsor: Sakrylle
-    sponsor_url: https://sub.sakrylle.com
+    sponsor_url: https://ai1.sakrylle.com
     sponsor_level: core
     key_type: official
     channel: deepseek-official

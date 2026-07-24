@@ -160,6 +160,7 @@ go run ./cmd/verify/main.go -provider Sakrylle -service cc -v
 - 2026-07-24：下架 `claude-kiro` 与 `claude-kiro-special`，Deepseek-Official 展示名改为 DeepSeek-Anthropic，清空 monitor.db 全部历史（不备份）。探针数 6 -> 4。两个 Claude API key 环境变量成为孤立行。
 - 2026-07-24（二）：下架 `grok`，清空 monitor.db 全部历史（不备份）。探针数 4 -> 3。`.env` 里的 `MONITOR_SAKRYLLE_GROK_API_KEY` 成为孤立行。
 - 2026-07-24（三）：卡片主标题由服务商名改为通道展示名；`deepseek-official` 的通道展示名由 DeepSeek-Anthropic 改为 DeepSeek。
+- 2026-07-24（四）：服务商展示名改为 Sakrylle，公开目标网址由 `sub.sakrylle.com` 改为 `ai1.sakrylle.com`；卡片标题仍显示通道名，外链确认弹窗显示服务商名。
 
 ## 7. 高风险坑位
 

@@ -102,7 +102,7 @@ function StatusCardComponent({
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <h3 className="text-base sm:text-lg font-bold text-primary">
-                <ExternalLink href={item.providerUrl} requireConfirm>{cardTitle}</ExternalLink>
+                <ExternalLink href={item.providerUrl} targetName={item.providerName} requireConfirm>{cardTitle}</ExternalLink>
               </h3>
               {/* 收藏按钮 */}
               {isFavorite && onToggleFavorite && (

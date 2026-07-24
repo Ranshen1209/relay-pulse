@@ -30,6 +30,7 @@ interface ExternalLinkProps {
   children: React.ReactNode;
   className?: string;
   trackLabel?: string;
+  targetName?: string; // 确认弹窗中的目标网站名称，可与链接文字不同
   compact?: boolean; // 是否使用紧凑模式（32px 高度，用于表格行）
   inline?: boolean; // 纯内联模式（无最小高度），用于多行文本紧凑排版
   requireConfirm?: boolean; // 是否需要二次确认弹窗
@@ -47,6 +48,7 @@ export function ExternalLink({
   children,
   className = '',
   trackLabel,
+  targetName,
   compact = false,
   inline = false,
   requireConfirm = false,
@@ -55,7 +57,7 @@ export function ExternalLink({
   const [showModal, setShowModal] = useState(false);
 
   // 获取显示名称（用于弹窗和埋点）
-  const displayName = typeof children === 'string' ? children : trackLabel || href || '';
+  const displayName = targetName || (typeof children === 'string' ? children : trackLabel || href || '');
 
   // 记录点击事件
   const trackClick = useCallback(() => {
