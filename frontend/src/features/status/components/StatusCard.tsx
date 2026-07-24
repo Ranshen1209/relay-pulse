@@ -31,7 +31,6 @@ interface StatusCardProps {
   slowLatencyMs: number;
   enableAnnotations?: boolean;      // 注解系统总开关，默认 true
   showCategoryTag?: boolean; // 是否显示分类标签（推荐/公益），默认 true
-  showProvider?: boolean;    // 是否显示服务商名称，默认 true
   showSponsor?: boolean;     // 是否显示赞助者信息，默认 true
   isFavorite?: (id: string) => boolean;  // 检查是否收藏
   onToggleFavorite?: (id: string) => void;  // 切换收藏状态
@@ -44,7 +43,6 @@ function StatusCardComponent({
   timeRange,
   slowLatencyMs,
   enableAnnotations = true,
-  showProvider = true,
   isFavorite,
   onToggleFavorite,
   onBlockHover,
@@ -61,6 +59,7 @@ function StatusCardComponent({
   const currentTimeRange = getTimeRanges(t).find((r) => r.id === timeRange);
   const useLatencyGradient = timeRange === '90m';
   const ServiceIcon = getCachedServiceIcon(item.serviceType);
+  const cardTitle = item.channelName || item.channel || item.providerName;
 
   // 检查是否有注解需要显示
   const hasAnnotations = hasAnyAnnotation(item, { enableAnnotations });
@@ -102,11 +101,9 @@ function StatusCardComponent({
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              {showProvider && (
-                <h3 className="text-base sm:text-lg font-bold text-primary">
-                  <ExternalLink href={item.providerUrl} requireConfirm>{item.providerName}</ExternalLink>
-                </h3>
-              )}
+              <h3 className="text-base sm:text-lg font-bold text-primary">
+                <ExternalLink href={item.providerUrl} requireConfirm>{cardTitle}</ExternalLink>
+              </h3>
               {/* 收藏按钮 */}
               {isFavorite && onToggleFavorite && (
                 <FavoriteButton

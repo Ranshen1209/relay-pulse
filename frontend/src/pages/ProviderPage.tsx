@@ -487,7 +487,6 @@ export default function ProviderPage() {
                       slowLatencyMs={slowLatencyMs}
                       enableAnnotations={enableAnnotations}
                       showCategoryTag={false}
-                      showProvider={!isEmbedMode}
                       isFavorite={isFavorite}
                       onToggleFavorite={toggleFavorite}
                       onBlockHover={handleBlockHover}

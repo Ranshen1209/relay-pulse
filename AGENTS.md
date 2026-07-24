@@ -128,7 +128,7 @@ go run ./cmd/verify/main.go -provider Sakrylle -service cc -v
 |---|---|---|---|---|---|
 | `gpt-pro` | `cx` | `cx-gpt-mini-chat` | `gpt-5.4-mini` | GPT-Pro (id 14, 号池) | 0.5x |
 | `gpt-pro-special` | `cx` | `cx-gpt-mini-chat` | `gpt-5.4-mini` | GPT-Pro-Special (id 3，旧名 GPT-Pro) | 0.4x |
-| `deepseek-official` | `dx` | `dx-flash-openai-chat` | `deepseek-v4-flash` | DeepSeek-Anthropic (id 9，官方直连) | 1.0x |
+| `deepseek-official` | `dx` | `dx-flash-openai-chat` | `deepseek-v4-flash` | Deepseek-Official (id 9，官方直连) | 1.0x |
 
 不监测：
 
@@ -159,6 +159,7 @@ go run ./cmd/verify/main.go -provider Sakrylle -service cc -v
 - 2026-06-26：下架 `claude-code-awsq` (id 12) 探针，清除该 channel 历史数据。探针数 7 -> 6。`.env` 里 `MONITOR_SAKRYLLE_CLAUDE_CODE_AWSQ_API_KEY` 成孤立行。
 - 2026-07-24：下架 `claude-kiro` 与 `claude-kiro-special`，Deepseek-Official 展示名改为 DeepSeek-Anthropic，清空 monitor.db 全部历史（不备份）。探针数 6 -> 4。两个 Claude API key 环境变量成为孤立行。
 - 2026-07-24（二）：下架 `grok`，清空 monitor.db 全部历史（不备份）。探针数 4 -> 3。`.env` 里的 `MONITOR_SAKRYLLE_GROK_API_KEY` 成为孤立行。
+- 2026-07-24（三）：卡片主标题由服务商名改为通道展示名；`deepseek-official` 的通道展示名由 DeepSeek-Anthropic 改为 DeepSeek。
 
 ## 7. 高风险坑位
 
