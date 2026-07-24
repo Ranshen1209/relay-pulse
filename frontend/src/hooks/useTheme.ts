@@ -1,13 +1,10 @@
 /**
  * 主题管理 Hook
  *
- * 功能：
- * - 管理主题状态
- * - localStorage 持久化
- * - 更新 DOM 属性
+ * 跟随浏览器的 prefers-color-scheme，并更新 DOM 主题属性。
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 
 export type ThemeId = 'default-dark' | 'light-cool';
 
@@ -22,43 +19,12 @@ export const THEMES: Theme[] = [
   { id: 'light-cool', nameKey: 'theme.lightCool', isDark: false },
 ];
 
-const STORAGE_KEY = 'relay-pulse-theme';
 const DEFAULT_THEME: ThemeId = 'default-dark';
+const DARK_MODE_QUERY = '(prefers-color-scheme: dark)';
 
-/**
- * 旧主题 ID → 新主题 ID 的迁移映射
- *
- * 历史上支持 night-dark / light-warm，现在精简为两套；
- * 这里把 localStorage 里的旧值平滑地映射到新值。
- */
-const LEGACY_THEME_MIGRATION: Record<string, ThemeId> = {
-  'night-dark': 'default-dark',
-  'light-warm': 'light-cool',
-};
-
-/**
- * 从 localStorage 获取保存的主题
- */
-function getStoredTheme(): ThemeId {
+function getSystemTheme(): ThemeId {
   if (typeof window === 'undefined') return DEFAULT_THEME;
-
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) return DEFAULT_THEME;
-
-    // 1) 当前合法主题 ID
-    if (THEMES.some((t) => t.id === stored)) {
-      return stored as ThemeId;
-    }
-
-    // 2) 旧主题 ID 自动迁移到对应的新主题
-    if (stored in LEGACY_THEME_MIGRATION) {
-      return LEGACY_THEME_MIGRATION[stored];
-    }
-  } catch {
-    // localStorage 不可用（隐私模式/安全策略）
-  }
-  return DEFAULT_THEME;
+  return window.matchMedia(DARK_MODE_QUERY).matches ? 'default-dark' : 'light-cool';
 }
 
 /**
@@ -78,32 +44,27 @@ function applyTheme(themeId: ThemeId): void {
 /**
  * 主题管理 Hook
  */
-export function useTheme() {
-  const [theme, setThemeState] = useState<ThemeId>(getStoredTheme);
+export function useTheme(forceTheme?: ThemeId) {
+  const [systemTheme, setSystemTheme] = useState<ThemeId>(getSystemTheme);
+  const theme = forceTheme ?? systemTheme;
 
-  // 主题变化时应用到 DOM 和 localStorage
+  useEffect(() => {
+    const mediaQuery = window.matchMedia(DARK_MODE_QUERY);
+    const syncTheme = () => setSystemTheme(mediaQuery.matches ? 'default-dark' : 'light-cool');
+
+    mediaQuery.addEventListener('change', syncTheme);
+    return () => mediaQuery.removeEventListener('change', syncTheme);
+  }, []);
+
   useEffect(() => {
     applyTheme(theme);
-    try {
-      localStorage.setItem(STORAGE_KEY, theme);
-    } catch {
-      // localStorage 不可用（隐私模式/安全策略），降级为内存状态
-    }
-    // 触发自定义事件，供 color.ts 监听
     window.dispatchEvent(new CustomEvent('theme-change', { detail: theme }));
   }, [theme]);
-
-  // setTheme 只更新 state，副作用由 useEffect 处理
-  const setTheme = useCallback((newTheme: ThemeId) => {
-    setThemeState(newTheme);
-  }, []);
 
   const currentTheme = THEMES.find((t) => t.id === theme) || THEMES[0];
 
   return {
     theme,
-    setTheme,
-    themes: THEMES,
     currentTheme,
     isDark: currentTheme.isDark,
   };

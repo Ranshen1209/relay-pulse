@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 import { SUPPORTED_LANGUAGES, LANGUAGE_PATH_MAP, LANGUAGE_NAMES, isSupportedLanguage, type SupportedLanguage } from '../i18n';
-import { ThemeSwitcher } from './ThemeSwitcher';
 import { RefreshButton } from './RefreshButton';
 
 interface HeaderProps {
@@ -110,7 +109,7 @@ export function Header({ stats, onFilterClick, onRefresh, loading, refreshCooldo
           </p>
         </div>
 
-        {/* 移动端：右上角操作区（语言 + 主题 + 统计卡片） */}
+        {/* 移动端：右上角操作区（语言 + 统计卡片） */}
         <div className="flex items-center gap-1 lg:hidden flex-shrink-0">
           {/* 语言切换器 - 点击展开 */}
           <div className="relative">
@@ -157,9 +156,6 @@ export function Header({ stats, onFilterClick, onRefresh, loading, refreshCooldo
             )}
           </div>
 
-          {/* 主题切换器 */}
-          <ThemeSwitcher />
-
           {/* GitHub 链接 */}
           <a
             href="https://github.com/Ranshen1209/sakrylle-status"
@@ -187,7 +183,7 @@ export function Header({ stats, onFilterClick, onRefresh, loading, refreshCooldo
           </div>
         </div>
 
-        {/* 桌面端：右侧完整操作区（语言 + 主题 + 统计卡片） */}
+        {/* 桌面端：右侧完整操作区（语言 + 统计卡片） */}
         <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
           {/* 语言切换器 - 点击/键盘展开 */}
           <div className="relative inline-block">
@@ -236,9 +232,6 @@ export function Header({ stats, onFilterClick, onRefresh, loading, refreshCooldo
               </>
             )}
           </div>
-
-          {/* 主题切换器 */}
-          <ThemeSwitcher />
 
           {/* GitHub 链接 */}
           <a

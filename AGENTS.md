@@ -122,20 +122,18 @@ go run ./cmd/verify/main.go -provider Sakrylle -service cc -v
 
 ## 6. 生产探针
 
-生产当前为 6 个探针，全部 `interval: 3m`，全部打 `https://api.sakrylle.com`。每个 group 使用独立 API key，因为 sub2api 的 `api_keys.group_id` 是单值。
+生产当前为 4 个探针，全部 `interval: 3m`，全部打 `https://api.sakrylle.com`。每个 group 使用独立 API key，因为 sub2api 的 `api_keys.group_id` 是单值。
 
 | Channel key | Service | Template | Model | Group (sub2api) | Rate |
 |---|---|---|---|---|---|
-| `claude-kiro` | `cc` | `cc-haiku-openai-chat` | `claude-haiku-4-5-20251001` | Claude-Kiro (id 15) | 0.9x |
-| `claude-kiro-special` | `cc` | `cc-haiku-openai-chat` | `claude-haiku-4-5-20251001` | Claude-Kiro-Special (id 2) | 0.6x |
 | `gpt-pro` | `cx` | `cx-gpt-mini-chat` | `gpt-5.4-mini` | GPT-Pro (id 14, 号池) | 0.5x |
 | `gpt-pro-special` | `cx` | `cx-gpt-mini-chat` | `gpt-5.4-mini` | GPT-Pro-Special (id 3，旧名 GPT-Pro) | 0.4x |
-| `deepseek-official` | `dx` | `dx-flash-openai-chat` | `deepseek-v4-flash` | Deepseek-Official (id 9，官方直连) | 1.0x |
+| `deepseek-official` | `dx` | `dx-flash-openai-chat` | `deepseek-v4-flash` | DeepSeek-Anthropic (id 9，官方直连) | 1.0x |
 | `grok` | `gk` | `gk-grok-openai-chat` | `grok-4.20-0309-non-reasoning` | Grok-API (id 22) | 0.001x |
 
 不监测：
 
-- 用户指定不监测：Claude-Max (id 16)、Claude-Max-C (id 17)。
+- 用户指定不监测所有 Claude group。
 - 生图分组：GPT-Image (id 5)、GPT-Image-2-4K (id 11)、GPT-Image-2-Async (id 21)，按调用计费，探针成本过高。
 - 已下架：Agnes-API (id 23)、Deepseek-Special (id 6 -> 28)、Claude-Code-AWSQ (id 12)，见历史调整。
 
@@ -160,10 +158,11 @@ go run ./cmd/verify/main.go -provider Sakrylle -service cc -v
 - 2026-06-15：清空 monitor.db 全部历史（不备份），下架 `agnes` (id 23) 探针。探针数 9 -> 8。`ag-flash-openai-chat.json` 模板与前端 Agnes 图标保留未删；`.env` 里 `MONITOR_SAKRYLLE_AGNES_API_KEY` 成孤立行。
 - 2026-06-15（二）：下架 `deepseek` (Deepseek-Special) 探针，仅清该 channel 历史，未动 `deepseek-official`。探针数 8 -> 7。`.env` 里 `MONITOR_SAKRYLLE_DEEPSEEK_API_KEY` 成孤立行。`deepseek-official` 不受影响，保留。
 - 2026-06-26：下架 `claude-code-awsq` (id 12) 探针，清除该 channel 历史数据。探针数 7 -> 6。`.env` 里 `MONITOR_SAKRYLLE_CLAUDE_CODE_AWSQ_API_KEY` 成孤立行。
+- 2026-07-24：下架 `claude-kiro` 与 `claude-kiro-special`，Deepseek-Official 展示名改为 DeepSeek-Anthropic，清空 monitor.db 全部历史（不备份）。探针数 6 -> 4。两个 Claude API key 环境变量成为孤立行。
 
 ## 7. 高风险坑位
 
-### claude-kiro-special 必须使用 OpenAI-compatible 模板
+### claude-kiro-special 历史上必须使用 OpenAI-compatible 模板
 
 不要把 `claude-kiro-special` 改回上游原生 `cc-haiku-arith` 模板。
 
@@ -209,14 +208,14 @@ GPT-Image 按调用计费，真实探针成本约 `$0.15/call`。仅 `/v1/models
 
 这些定制都在 `theme/sakrylle`，每次 rebase 上游都容易冲突：
 
-- 主题：从上游 4 个主题改为 2 个主题（`default-dark`、`light-cool`）。亮色主题使用 hue 256（Monet 薰衣草），不是上游 hue 210。
+- 主题：从上游 4 个主题改为 2 个主题（`default-dark`、`light-cool`），并通过 `prefers-color-scheme` 自动跟随浏览器，不提供手动切换。亮色主题使用 hue 256（Monet 薰衣草），不是上游 hue 210。
 - 品牌：`Sakrylle Status` 分布于 React i18n（zh/en/ru/ja 4 个 locale）和 Go SSR meta（`internal/api/meta.go` title/description/JSON-LD/404）。
 - Logo：樱花 SVG 替代上游 RP 文字 logo。
 - 语言切换：使用文字代码（ZH/EN/RU/JA），无国旗图标。
 - 删除页面/组件：`ContactPage`、`OnboardingPage`、`ChangeRequestPage`、`Footer.tsx`、`useOnboarding`、`useChangeRequest`、`utils/share.ts`。rebase 后它们可能回来，需要重新删除。
 - 状态表：隐藏 Model/Price/Listed-days 列；`MOBILE_ROW_HEIGHT=200`；`HIDDEN_ANNOTATION_IDS` 过滤 `frequency`、`public_service`、`key_type`、`sponsor_*`。
 - Channel 解析：`parseChannelType` 对无前缀 channel 返回 `null`，上游返回 `'unknown'`。
-- 主题迁移：`useTheme.ts` 含 `LEGACY_THEME_MIGRATION`，用于处理旧 localStorage。
+- 主题逻辑：`useTheme.ts` 监听浏览器深浅色偏好；截图模式仍强制 `default-dark`。
 
 冲突常客：
 
@@ -268,7 +267,7 @@ curl -s https://status.sakrylle.com/api/version | jq
 
 ```bash
 # 1. relay-pulse 侧 probe_id
-ssh ssh-tokyo 'docker logs --tail=200 relay-pulse 2>&1 | grep -E "claude-kiro-special|probe_id"'
+ssh ssh-tokyo 'docker logs --tail=200 relay-pulse 2>&1 | grep -E "gpt-pro|probe_id"'
 
 # 2. sub2api 侧 usage_logs，key_id 在 sub2api 后台查
 ssh ssh-tokyo 'docker exec sub2api-postgres psql -U sub2api -d sub2api -c "SELECT created_at, model_name, total_cost FROM usage_logs WHERE api_key_id=<id> ORDER BY id DESC LIMIT 5"'

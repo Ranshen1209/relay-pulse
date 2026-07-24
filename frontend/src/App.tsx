@@ -15,6 +15,7 @@ import { useSeoMeta } from './hooks/useSeoMeta';
 import { useUrlState } from './features/status/hooks/useUrlState';
 import { useFavorites } from './features/status/hooks/useFavorites';
 import { useAnnouncements } from './hooks/useAnnouncements';
+import { useTheme } from './hooks/useTheme';
 import { createMediaQueryEffect } from './utils/mediaQuery';
 import { trackPeriodChange, trackServiceFilter, trackEvent } from './utils/analytics';
 import type { TooltipState, ProcessedMonitorData, ChannelOption } from './types';
@@ -32,13 +33,8 @@ function App() {
     return new URLSearchParams(location.search).get('screenshot') === '1';
   }, [location.search]);
 
-  // 截图模式下强制使用 default-dark 主题
-  useEffect(() => {
-    if (!isScreenshotMode) return;
-    const root = document.documentElement;
-    root.setAttribute('data-theme', 'default-dark');
-    root.style.colorScheme = 'dark';
-  }, [isScreenshotMode]);
+  // 正常页面跟随浏览器配色；截图模式保持固定深色。
+  useTheme(isScreenshotMode ? 'default-dark' : undefined);
 
   // 截图时间戳（组件挂载时记录）
   const screenshotTimestamp = useMemo(() => {
