@@ -11,7 +11,7 @@ import type { ViewMode, SortConfig, BoardFilter } from '../../../types';
  * - service: 服务筛选
  * - channel: 渠道筛选
  * - category: 分类筛选
- * - view: 视图模式（默认 table）
+ * - view: 视图模式（默认 grid）
  * - sort: 排序配置（格式：key_direction，如 uptime_desc）
  * - fav: 仅显示收藏（1=是，默认否）
  */
@@ -55,7 +55,7 @@ const DEFAULTS = {
   filterChannel: [] as string[],   // 空数组表示"全部"
   filterCategory: [] as string[],  // 空数组表示"全部"
   showFavoritesOnly: false,        // 默认显示全部
-  viewMode: 'table' as ViewMode,
+  viewMode: 'grid' as ViewMode,
   sortKey: 'uptime',
   sortDirection: 'desc' as const,
 };

@@ -1,7 +1,7 @@
 # Sakrylle Status — Production config
 #
 # Probes Sakrylle API (sub.sakrylle.com) on behalf of users.
-# 4 monitors mirror the live token-billed groups in sub2api.
+# 3 monitors mirror the live token-billed groups in sub2api.
 # Excludes all Claude groups and the 3 image groups: GPT-Image (5),
 # GPT-Image-2-4K (11), and GPT-Image-2-Async (21).
 #
@@ -9,12 +9,6 @@
 # All keys are scoped to one Sakrylle group each (api_keys.group_id is
 # single-valued in sub2api), so we need 1 key per group.
 #
-# Grok / Agnes are reverse endpoints whose chat-completions path returns
-# no readable assistant content (Agnes always empty; Grok unreliable at
-# arithmetic). Their templates use an envelope check — success_contains
-# matches the echoed model id, confirming HTTP 200 + correct routing +
-# real billing without depending on response text.
-
 interval: 3m          # default cadence — every monitor below inherits this
 slow_latency: 8s
 
@@ -86,22 +80,3 @@ monitors:
     retry: 3
     timeout: 30s
     env_var_name: MONITOR_SAKRYLLE_DEEPSEEK_OFFICIAL_API_KEY
-
-  # --- Grok-API: grok-4.20-0309-non-reasoning, envelope check @ 0.001x ---
-  - provider: sakrylle
-    provider_name: Sakrylle API
-    provider_url: https://sub.sakrylle.com
-    service: gk
-    service_name: Grok
-    category: commercial
-    sponsor: Sakrylle
-    sponsor_url: https://sub.sakrylle.com
-    sponsor_level: core
-    key_type: official
-    channel: grok
-    channel_name: Grok-API
-    base_url: https://api.sakrylle.com
-    template: gk-grok-openai-chat
-    retry: 3
-    timeout: 30s
-    env_var_name: MONITOR_SAKRYLLE_GROK_API_KEY

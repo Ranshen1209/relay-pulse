@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Sakrylle Status · 服务可用性监测",
-    "description": "Sakrylle Status 实时监测 Sakrylle API 中转服务的可用性、延迟与成功率，覆盖 GPT、DeepSeek、Grok 等模型，帮助用户和管理员第一时间发现异常。"
+    "description": "Sakrylle Status 实时监测 Sakrylle API 中转服务的可用性、延迟与成功率，覆盖 GPT 与 DeepSeek 模型，帮助用户和管理员第一时间发现异常。"
   },
   "common": {
     "loading": "正在同步数据节点...",

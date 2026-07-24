@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Sakrylle Status · Service availability monitor",
-    "description": "Sakrylle Status — real-time availability, latency, and success-rate monitoring of the Sakrylle API service across GPT, DeepSeek, and Grok models, so users and operators see issues the moment they happen."
+    "description": "Sakrylle Status — real-time availability, latency, and success-rate monitoring of the Sakrylle API service across GPT and DeepSeek models, so users and operators see issues the moment they happen."
   },
   "common": {
     "loading": "Syncing data nodes...",

@@ -122,22 +122,21 @@ go run ./cmd/verify/main.go -provider Sakrylle -service cc -v
 
 ## 6. 生产探针
 
-生产当前为 4 个探针，全部 `interval: 3m`，全部打 `https://api.sakrylle.com`。每个 group 使用独立 API key，因为 sub2api 的 `api_keys.group_id` 是单值。
+生产当前为 3 个探针，全部 `interval: 3m`，全部打 `https://api.sakrylle.com`。每个 group 使用独立 API key，因为 sub2api 的 `api_keys.group_id` 是单值。
 
 | Channel key | Service | Template | Model | Group (sub2api) | Rate |
 |---|---|---|---|---|---|
 | `gpt-pro` | `cx` | `cx-gpt-mini-chat` | `gpt-5.4-mini` | GPT-Pro (id 14, 号池) | 0.5x |
 | `gpt-pro-special` | `cx` | `cx-gpt-mini-chat` | `gpt-5.4-mini` | GPT-Pro-Special (id 3，旧名 GPT-Pro) | 0.4x |
 | `deepseek-official` | `dx` | `dx-flash-openai-chat` | `deepseek-v4-flash` | DeepSeek-Anthropic (id 9，官方直连) | 1.0x |
-| `grok` | `gk` | `gk-grok-openai-chat` | `grok-4.20-0309-non-reasoning` | Grok-API (id 22) | 0.001x |
 
 不监测：
 
-- 用户指定不监测所有 Claude group。
+- 用户指定不监测所有 Claude group 和 Grok-API (id 22)。
 - 生图分组：GPT-Image (id 5)、GPT-Image-2-4K (id 11)、GPT-Image-2-Async (id 21)，按调用计费，探针成本过高。
 - 已下架：Agnes-API (id 23)、Deepseek-Special (id 6 -> 28)、Claude-Code-AWSQ (id 12)，见历史调整。
 
-`gk`/`ag` 是新 service code，前端 `ServiceIcon.tsx` 已加 Grok/Agnes 品牌图标。Agnes 探针虽已下架，但图标保留；无探测时不渲染，移除会徒增 rebase 冲突。
+`gk`/`ag` 是新 service code，前端 `ServiceIcon.tsx` 已加 Grok/Agnes 品牌图标。两个探针虽已下架，但图标保留；无探测时不渲染，移除会徒增 rebase 冲突。
 
 ### Retry / timeout
 
@@ -159,6 +158,7 @@ go run ./cmd/verify/main.go -provider Sakrylle -service cc -v
 - 2026-06-15（二）：下架 `deepseek` (Deepseek-Special) 探针，仅清该 channel 历史，未动 `deepseek-official`。探针数 8 -> 7。`.env` 里 `MONITOR_SAKRYLLE_DEEPSEEK_API_KEY` 成孤立行。`deepseek-official` 不受影响，保留。
 - 2026-06-26：下架 `claude-code-awsq` (id 12) 探针，清除该 channel 历史数据。探针数 7 -> 6。`.env` 里 `MONITOR_SAKRYLLE_CLAUDE_CODE_AWSQ_API_KEY` 成孤立行。
 - 2026-07-24：下架 `claude-kiro` 与 `claude-kiro-special`，Deepseek-Official 展示名改为 DeepSeek-Anthropic，清空 monitor.db 全部历史（不备份）。探针数 6 -> 4。两个 Claude API key 环境变量成为孤立行。
+- 2026-07-24（二）：下架 `grok`，清空 monitor.db 全部历史（不备份）。探针数 4 -> 3。`.env` 里的 `MONITOR_SAKRYLLE_GROK_API_KEY` 成为孤立行。
 
 ## 7. 高风险坑位
 
@@ -170,7 +170,7 @@ go run ./cmd/verify/main.go -provider Sakrylle -service cc -v
 
 `cc-haiku-openai-chat` 是 `cx-gpt-mini-chat` 的 fork，走 `POST /v1/chat/completions` 加 Claude model id。sub2api 内部执行 OpenAI -> Anthropic 翻译上行，会产生真实 `usage_logs`，约 2s，是真实计费。
 
-### Grok / Agnes 使用 envelope 校验
+### Grok / Agnes 历史上使用 envelope 校验
 
 `grok`/`agnes` 是逆向端点，chat-completions 路径拿不到稳定可读回复：
 
@@ -213,7 +213,7 @@ GPT-Image 按调用计费，真实探针成本约 `$0.15/call`。仅 `/v1/models
 - Logo：樱花 SVG 替代上游 RP 文字 logo。
 - 语言切换：使用文字代码（ZH/EN/RU/JA），无国旗图标。
 - 删除页面/组件：`ContactPage`、`OnboardingPage`、`ChangeRequestPage`、`Footer.tsx`、`useOnboarding`、`useChangeRequest`、`utils/share.ts`。rebase 后它们可能回来，需要重新删除。
-- 状态表：隐藏 Model/Price/Listed-days 列；`MOBILE_ROW_HEIGHT=200`；`HIDDEN_ANNOTATION_IDS` 过滤 `frequency`、`public_service`、`key_type`、`sponsor_*`。
+- 状态视图：桌面端默认使用卡片视图，移动端强制表格；隐藏 Model/Price/Listed-days 列；`MOBILE_ROW_HEIGHT=200`；`HIDDEN_ANNOTATION_IDS` 过滤 `frequency`、`public_service`、`key_type`、`sponsor_*`。
 - Channel 解析：`parseChannelType` 对无前缀 channel 返回 `null`，上游返回 `'unknown'`。
 - 主题逻辑：`useTheme.ts` 监听浏览器深浅色偏好；截图模式仍强制 `default-dark`。
 
