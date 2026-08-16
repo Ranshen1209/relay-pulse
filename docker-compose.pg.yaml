@@ -1,5 +1,8 @@
 version: '3.8'
 
+# 仅为 PostgreSQL 测试示例，不是 Sakrylle 生产 Compose。
+# 不要据此推断生产服务名、镜像、端口、网络或数据目录。
+
 services:
   # PostgreSQL 数据库
   postgres:

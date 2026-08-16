@@ -1,10 +1,14 @@
 
+# 仅为本地 SQLite/开发示例，不是 Sakrylle 生产 Compose。
+# 生产使用服务器上的独立 Compose，服务名为 relay-pulse；镜像、网络、
+# 挂载和 digest 必须以服务器现场为准。
+
 services:
   # ============================================
   # 方式一：使用 SQLite (默认，单机部署)
   # ============================================
   monitor:
-    # 使用预构建镜像（生产环境推荐）
+    # 使用预构建上游镜像（通用示例；实际部署应固定 digest）
     # image: ghcr.io/prehisle/relay-pulse:latest
 
     # 本地构建（开发环境，支持 ARM64/AMD64）
@@ -19,8 +23,8 @@ services:
     container_name: relaypulse-monitor
 
     # 端口映射
-    # 生产环境：80:8080（通过 Cloudflare CDN 访问）
-    # 开发环境：8080:8080（本地直接访问）
+    # 对外部署示例：80:8080（通常还需独立反向代理）
+    # 本地开发示例：8080:8080（本地直接访问）
     ports:
       - "80:8080"
 
@@ -34,7 +38,7 @@ services:
       # SQLite 数据库持久化（使用独立的 /data 目录，避免覆盖 /app 导致二进制文件不更新）
       - relay-pulse-data:/data
 
-    # 环境变量覆盖 API 密钥 (推荐)
+    # 环境变量覆盖 API 密钥（通用做法）
     environment:
       # 时区设置
       - TZ=Asia/Shanghai
@@ -49,7 +53,7 @@ services:
       # - MONITOR_88CODE_CX_API_KEY=sk-another-key
       # - MONITOR_DUCKCODING_CC_API_KEY=sk-duck-key
 
-    # 从 .env 文件加载环境变量 (推荐用于生产环境)
+    # 从 .env 文件加载环境变量（通用示例）
     # 使用方式: docker compose --env-file .env up -d
     # env_file:
     #   - .env
@@ -120,7 +124,7 @@ services:
   #     - MONITOR_POSTGRES_USER=monitor
   #     - MONITOR_POSTGRES_PASSWORD=monitor_password
   #     - MONITOR_POSTGRES_DATABASE=llm_monitor
-  #     - MONITOR_POSTGRES_SSLMODE=disable  # ⚠️ 仅限本地测试！生产环境必须使用 require
+  #     - MONITOR_POSTGRES_SSLMODE=disable  # 仅限本地测试；非本地部署应使用 require
   #   healthcheck:
   #     test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
   #     interval: 30s
@@ -142,7 +146,7 @@ networks:
 # 使用说明
 # ============================================
 #
-# ⚠️ 重要：生产部署必须使用环境变量文件加载 API Key！
+# 重要：本文件不是 Sakrylle 生产 Compose。任何部署都不得把真实 API Key 提交到仓库。
 #
 # 方式一：SQLite 模式（默认，单机部署）
 # ------------------------------
@@ -150,9 +154,9 @@ networks:
 #    mkdir -p config && cp config.yaml.example config/config.yaml
 #    vim config/config.yaml  # 编辑配置文件
 #
-# 2. 启动服务（推荐使用环境变量覆盖 API Key）:
+# 2. 启动服务（使用环境变量覆盖 API Key）:
 #    docker compose --env-file .env up -d monitor
-#    # 或者直接启动（API Key 写在 config.yaml 中）:
+#    # 无需 API Key 的本地配置也可直接启动:
 #    docker compose up -d monitor
 #
 # 3. 访问服务:
@@ -173,7 +177,7 @@ networks:
 #    MONITOR_STORAGE_TYPE=postgres
 #    MONITOR_POSTGRES_HOST=postgres
 #    MONITOR_POSTGRES_PASSWORD=your_secure_password
-#    MONITOR_POSTGRES_SSLMODE=require  # ⚠️ 生产环境必须启用 SSL
+#    MONITOR_POSTGRES_SSLMODE=require  # 非本地连接应启用 SSL
 #
 # 3. 启动服务（包含 PostgreSQL）:
 #    docker compose --env-file .env up -d postgres monitor-pg

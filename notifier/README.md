@@ -2,6 +2,10 @@
 
 多平台通知服务，用于订阅 RelayPulse 监测状态变更通知。
 
+> notifier 是独立服务，与 relay-pulse 主容器解耦。本文示例中的 URL、Token
+> 和配置文件均为占位符；生产是否部署 notifier、使用哪个镜像和入口，必须以
+> notifier 自己的 Compose 与现场核验为准，不能套用 relay-pulse 的生产事实。
+
 ## 功能特性
 
 - 支持 **Telegram** 和 **QQ** 双平台通知
@@ -95,10 +99,12 @@ limits:
 
 screenshot:
   enabled: false                # 是否启用截图功能（/snap 命令）
-  base_url: "https://relaypulse.top"  # 截图目标 URL
+  base_url: "https://your-status.example.com"  # 截图目标 URL（占位符）
   timeout: "30s"                # 截图超时时间
   max_concurrent: 3             # 最大并发截图数
 ```
+
+启用截图时必须显式配置 `screenshot.base_url`，不要依赖代码中的上游历史默认值。
 
 ## 环境变量
 

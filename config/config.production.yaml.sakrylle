@@ -1,21 +1,28 @@
 # Sakrylle Status — Production config
 #
 # Probes Sakrylle API on behalf of users; public links point to ai1.sakrylle.com.
-# 3 monitors mirror the live token-billed groups in sub2api.
+# 3 monitor definitions were observed in production on
+# 2026-08-16. The GPT template still requests gpt-5.4-mini; that model was
+# absent from /v1/models and recent probes returned 503. gpt-5.4 is visible for
+# both keys, but it needs one authorized real request plus usage-log confirmation
+# before this repository or production is changed. Until then, the GPT model is
+# a known-stale configuration item, not a verified migration target.
 # Excludes all Claude groups and the 3 image groups: GPT-Image (5),
 # GPT-Image-2-4K (11), and GPT-Image-2-Async (21).
 #
 # API keys are injected via env vars; see env_var_name on each monitor.
 # All keys are scoped to one Sakrylle group each (api_keys.group_id is
-# single-valued in sub2api), so we need 1 key per group.
+# single-valued in sub2api), so we need 1 key per group. Current verified
+# bindings are GPT-Pro id 14, GPT-Pro-Special id 3, and Deepseek-Anthropic
+# id 9; channel key names remain relay-pulse-gpt-pro, relay-pulse-gpt-pro-
+# special, and relay-pulse-deepseek-official.
 #
 interval: 3m          # default cadence — every monitor below inherits this
 slow_latency: 8s
 
 # Public-facing origin — used by the SSR meta layer to build
-# og:url, og:image, canonical, hreflang. Without this it falls back
-# to upstream's https://relaypulse.top and social previews show the
-# wrong site.
+# og:url, og:image, canonical, hreflang. Keep this explicit; the upstream
+# default is not a Sakrylle production URL.
 public_base_url: https://status.sakrylle.com
 
 storage:
@@ -24,7 +31,7 @@ storage:
     path: /data/monitor.db
 
 monitors:
-  # --- GPT-Pro: gpt-5.4-mini cheap probe, 号池 @ 0.5x ---
+  # --- GPT-Pro: configured gpt-5.4-mini; group id 14, rate 0.35 ---
   - provider: sakrylle
     provider_name: Sakrylle
     provider_url: https://ai1.sakrylle.com
@@ -43,7 +50,7 @@ monitors:
     timeout: 30s
     env_var_name: MONITOR_SAKRYLLE_GPT_PRO_API_KEY
 
-  # --- GPT-Pro-Special: 旧 GPT-Pro 重命名，特惠 @ 0.4x ---
+  # --- GPT-Pro-Special: group id 3, rate 0.30 ---
   - provider: sakrylle
     provider_name: Sakrylle
     provider_url: https://ai1.sakrylle.com
@@ -62,7 +69,8 @@ monitors:
     timeout: 30s
     env_var_name: MONITOR_SAKRYLLE_GPT_PRO_SPECIAL_API_KEY
 
-  # --- DeepSeek: deepseek-v4-flash via Anthropic 官方直连 @ 1.0x ---
+  # --- DeepSeek: group id 9 is currently named Deepseek-Anthropic;
+  #     the probe intentionally uses the OpenAI-compatible endpoint @ 1.0x ---
   - provider: sakrylle
     provider_name: Sakrylle
     provider_url: https://ai1.sakrylle.com
