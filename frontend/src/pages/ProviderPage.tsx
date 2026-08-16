@@ -70,7 +70,7 @@ export default function ProviderPage() {
   const [filterService, setFilterService] = useState<string[]>([]);
   const [filterChannel, setFilterChannel] = useState<string[]>([]);
   // filterCategory 在 Provider 页面固定为空数组（全部），不需要状态
-  const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const [viewMode, setViewMode] = useState<ViewMode>('table');
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     key: 'uptime',
     direction: 'desc',

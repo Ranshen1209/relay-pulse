@@ -158,29 +158,33 @@ config.yaml 是小体积配置，可在确认备份后通过 scp 更新并观察
 
 `ci-release.yml` 中的 `VITE_NOTIFIER_API_URL` 和 notifier 截图配置的代码默认值仍指向上游历史域名，均未从当前生产现场验证。`notifier/README.md` 已改为显式占位符；不要把代码 fallback 当成生产入口，也不要据此写入新的服务器地址。
 
-## 6. 当前生产探针（只读核验快照）
+## 6. 当前生产探针（2026-08-16 核验快照）
 
-以下事实由 2026-08-16 通过 `ssh-sakrylle`、生产 `config.yaml`、Sub2API PostgreSQL、`/v1/models` 和最近日志核对得到。生产实际加载 3 个 monitor，provider 均为 `sakrylle`。未执行新的真实 GPT 请求，也未改生产配置或数据。
+以下事实由 2026-08-16 通过 `ssh-sakrylle`、生产 `config.yaml`、Sub2API PostgreSQL、`/v1/models`、真实请求和最近日志核对得到。生产实际加载 11 个 monitor，provider 均为 `sakrylle`；按维护者授权，GPT-Image（group 5）、Claude-Max（group 16）和 Claude-Max-C（group 17）明确排除。
 
-| Channel key | Service | Template / 配置 request model | Sub2API 当前 group / channel | 生产核验 |
+| Channel key | Service | Template / request model | Sub2API group / rate | 最近核验 |
 |---|---|---|---|---|
-| gpt-pro | cx | cx-gpt-mini-chat / gpt-5.4-mini | GPT-Pro，id 14 / OpenAI GPT，rate 0.35 | 配置模型不在 /v1/models；最近返回 503，24h usage log 为 0。gpt-5.4 仅为可见候选，真实请求与 usage 待生产核实。 |
-| gpt-pro-special | cx | cx-gpt-mini-chat / gpt-5.4-mini | GPT-Pro-Special，id 3 / OpenAI GPT，rate 0.30 | 配置模型不在 /v1/models；最近返回 503，24h usage log 为 0。gpt-5.4 仅为可见候选，真实请求与 usage 待生产核实。 |
-| deepseek-official | dx | dx-flash-openai-chat / deepseek-v4-flash | 当前组名 Deepseek-Anthropic，id 9 / Deepseek Channel，rate 1.0 | /v1/models 可见；最近日志持续 200，24h 有 480 条 usage log。 |
+| claude-awsq | cc | cc-haiku-openai-chat / claude-haiku-4-5-20251001 | 2 / 0.30 | HTTP 200，语义校验通过 |
+| gpt-pro-special | cx | cx-gpt-mini-chat / gpt-5.6-terra | 3 / 0.30 | HTTP 200，真实 usage 已确认 |
+| deepseek-official | dx | dx-flash-openai-chat / deepseek-v4-flash | 9 / 1.00 | HTTP 200；展示名 DeepSeek-Anthropic |
+| gpt-pro | cx | cx-gpt-mini-chat / gpt-5.6-terra | 14 / 0.35 | HTTP 200，真实 usage 已确认 |
+| claude-kiro | cc | cc-haiku-openai-chat / claude-haiku-4-5-20251001 | 15 / 0.30 | HTTP 200，语义校验通过 |
+| grok | gk | gk-grok-openai-chat / grok-4.20-0309-non-reasoning | 22 / 0.10 | HTTP 200，model envelope 校验通过 |
+| deepseek-openai | dx | dx-flash-openai-chat-extended / deepseek-v4-flash | 31 / 1.00 | HTTP 200；32-token 上限用于容纳 reasoning |
+| deepseek-plan-anthropic | dx | dx-flash-openai-chat / deepseek-v4-flash | 33 / 0.60 | HTTP 200 |
+| deepseek-plan-openai | dx | dx-flash-openai-chat / deepseek-v4-flash | 34 / 0.60 | HTTP 200 |
+| gpt-plus | cx | cx-gpt-mini-chat / gpt-5.6-terra | 35 / 0.20 | HTTP 200，真实 usage 已确认 |
+| gpt-team | cx | cx-gpt-mini-chat / gpt-5.6-terra | 36 / 0.15 | HTTP 200，真实 usage 已确认 |
 
-共同事实：生产配置声明 `interval: 3m`、`retry: 3`、`timeout: 30s`，API base URL 为 `https://api.sakrylle.com`，请求路径为 OpenAI-compatible `POST /v1/chat/completions`。`cx-gpt-mini-chat` 模板默认 `retry: 0`、`timeout: 15s`，`dx-flash-openai-chat` 默认 `retry: 0`、`timeout: 30s`；monitor 层值覆盖模板默认值。`retry: 3` 表示最多 4 次尝试，`timeout: 30s` 是整轮尝试共享的总预算，超时不会重试。默认退避为 `retry_base_delay=200ms`、`retry_max_delay=2s`、`retry_jitter=0.2`。
+共同事实：生产配置声明 `interval: 3m`、`retry: 3`、`timeout: 30s`，API base URL 为 `https://api.sakrylle.com`，请求路径主要为 OpenAI-compatible `POST /v1/chat/completions`。`retry: 3` 表示最多 4 次尝试，`timeout: 30s` 是整轮尝试共享的总预算，超时不会重试。默认退避为 `retry_base_delay=200ms`、`retry_max_delay=2s`、`retry_jitter=0.2`。
 
-生产 key 的变量名和绑定状态已核对为 active：
-MONITOR_SAKRYLLE_GPT_PRO_API_KEY -> group 14、
-MONITOR_SAKRYLLE_GPT_PRO_SPECIAL_API_KEY -> group 3、
-MONITOR_SAKRYLLE_DEEPSEEK_OFFICIAL_API_KEY -> group 9。
-只记录状态，不记录 key 值。服务器 .env 中仍有若干历史 Claude/Grok/Agnes/旧 Deepseek key 行；它们不代表启用 monitor，清理前需单独授权。
+11 个 monitor 均使用绑定到单一 group 的独立 active key，环境变量名分别在生产配置的 `env_var_name` 中声明；只记录绑定状态，不记录 key 值。GPT-Image key 及服务器 `.env` 中的历史 Claude/Grok/Agnes/旧 Deepseek 行不代表启用 monitor，清理或撤销前需单独授权。
 
-/v1/models 结果：GPT 两个 key 返回 gpt-5.4、gpt-5.5、gpt-5.6-* 等模型，但没有 gpt-5.4-mini；DeepSeek key 返回 deepseek-v4-flash 与 deepseek-v4-pro。在 GPT 新模型完成一次真实请求并产生 usage log 前，不得把“可见”写成“已恢复”。
+2026-08-16 已在服务器本地备份配置、`.env` 和 SQLite，然后清空 `probe_history`、`service_states`、`status_events`、`channel_states`、`monitor_overrides`；完整性检查为 `ok`。清理后产生的记录属于新周期，不应与旧历史混淆。四个 GPT monitor 均由 monitor 级 `request_model: gpt-5.6-terra` 显式覆盖模板默认值；未经新的真实请求和 usage 核验，不要移除该覆盖或改用其他模型。
 
 ### 历史探针记录
 
-下列调整记录保留用于审计，均不是当前启用列表：
+下列调整记录保留用于审计；标注“历史状态”的条目不是当前启用列表，最后一条记录当前状态：
 
 - 2026-05-26（历史状态）：探针节奏由 9m 收紧到 3m。
 - 2026-06-04（历史状态）：Sub2API 后台将旧 GPT-Pro (id 3) 重命名为 GPT-Pro-Special，新上线 GPT-Pro (id 14) 号池。relay-pulse 同步将 `gpt-pro` 历史数据迁移至 `gpt-pro-special`，新增 `gpt-pro` 和 `claude-code-awsq` 两个探针。
@@ -193,16 +197,17 @@ MONITOR_SAKRYLLE_DEEPSEEK_OFFICIAL_API_KEY -> group 9。
 - 2026-07-24（二，历史状态）：下架 `grok`，清空 `monitor.db` 全部历史（不备份）。探针数 4 -> 3。`.env` 里的 `MONITOR_SAKRYLLE_GROK_API_KEY` 成为孤立行。
 - 2026-07-24（三，历史状态）：卡片主标题由服务商名改为通道展示名；`deepseek-official` 的通道展示名由 DeepSeek-Anthropic 改为 DeepSeek。
 - 2026-07-24（四，历史状态）：服务商展示名改为 Sakrylle，公开目标网址由 `sub.sakrylle.com` 改为 `ai1.sakrylle.com`；卡片标题仍显示通道名，外链确认弹窗显示服务商名。
+- 2026-08-16（当前状态）：按维护者授权保留 11 个 monitor，排除 GPT-Image（5）、Claude-Max（16）和 Claude-Max-C（17）；四个 GPT 通道使用 gpt-5.6-terra，`deepseek-official` 展示名为 DeepSeek-Anthropic，状态页默认使用列表视图，并清空全部历史/状态表。
 
 ## 7. 高风险探针与历史模板
 
-Claude、Grok、Agnes、GPT-Image 和旧 Deepseek-Special 当前都不在生产 monitor 列表。保留模板或前端图标不等于可以重新启用；重新启用必须先核对 group、key、`/v1/models`、真实请求和 usage log。
+Claude-AWSQ、Claude-Kiro、Grok 和新增 DeepSeek/GPT group 当前已在生产 monitor 列表。GPT-Image（5）、Claude-Max（16）、Claude-Max-C（17）、Agnes、Claude-Code-AWSQ（12）和旧 Deepseek-Special 当前未启用。保留模板、key 或前端图标不等于可以重新启用；重新启用必须先核对 group、key、`/v1/models`、真实请求和 usage log。
 
 历史 `gk` / `ag` service code 与前端 Grok/Agnes 图标保留用于兼容定制分支；无对应 monitor 时不会渲染，不应把保留代码误认成已启用探针。
 
-### GPT 候选模型（当前待生产核实）
+### GPT（当前已启用）
 
-`cx-gpt-mini-chat` 仍请求 `gpt-5.4-mini`；该模型已确认不在两个 GPT key 的 `/v1/models` 中，最近探针返回 503。`gpt-5.4` 目前只是在 `/v1/models` 可见的候选，必须先获得真实请求授权并确认产生 usage log，才能修改模板或部署。禁止只因模型可见就批量替换。
+GPT-Pro、GPT-Pro-Special、GPT-Plus 和 GPT-Team 均由 monitor 显式请求 `gpt-5.6-terra`，并已完成真实请求与 usage 核验。`cx-gpt-mini-chat` 模板的默认 `gpt-5.4-mini` 仍保留给其他历史调用；不要在没有对应 group 验证的情况下全局修改模板。
 
 ### claude-kiro-special（历史状态，当前未启用）
 
@@ -210,19 +215,20 @@ Claude、Grok、Agnes、GPT-Image 和旧 Deepseek-Special 当前都不在生产 
 
 历史验证可用的 `cc-haiku-openai-chat` 是 `cx-gpt-mini-chat` 的 fork，走 `POST /v1/chat/completions` 加 Claude model id；Sub2API 执行 OpenAI -> Anthropic 翻译后曾产生真实 usage log。若未来考虑恢复，仍须按当时生产重新核验，不能沿用历史成功结论。
 
-### Grok / Agnes（历史状态，当前未启用）
+### Grok / Agnes
 
-两者是逆向端点，chat-completions 路径历史上拿不到稳定可读回复：
+Grok group 22 当前已启用并使用 model envelope 校验；Agnes group 23 仍未启用。两者的逆向端点在历史上都拿不到稳定可读回复：
 
 - Agnes (`agnes-2.0-flash` / `agnes-1.5-flash`) 曾固定 `content=null`、`finish_reason=length`、128 输出 token，且忽略 `max_tokens`。
 - Grok (`grok-4.20-0309-non-reasoning`) 曾能返回正文但算术不可靠。
 
-因此历史模板不用算术答案校验，而用 `success_contains: "{{MODEL}}"` 做 envelope/model 回显校验，并另查 usage log。不要把这些历史模板改成普通算术探针；`grok-build-console` 从未被真实验证，不要使用。
+因此 Grok 当前模板不用算术答案校验，而用 `success_contains: "{{MODEL}}"` 做 envelope/model 回显校验，并另查 usage log。不要把 Agnes 的历史模板改成普通算术探针；`grok-build-console` 从未被真实验证，不要使用。
 
 ### DeepSeek（当前启用）
 
 - `dx-flash-openai-chat.json` 是自建模板，固定走 OpenAI-compatible 路径。
 - `max_tokens: 8` 用来抑制 thinking-token 成本；不要未经验证切换协议或提高上限。
+- group 9、33、34 使用上述 8-token 模板；group 31 使用 `dx-flash-openai-chat-extended.json` 的 32-token 版本，因为该路由会先消耗 reasoning token。
 - 当前只探 `deepseek-v4-flash`；`deepseek-v4-pro` 虽在 `/v1/models` 可见，但未配置为探针。
 
 ### Deepseek-Special（历史状态，当前未启用）
@@ -231,9 +237,9 @@ Claude、Grok、Agnes、GPT-Image 和旧 Deepseek-Special 当前都不在生产 
 
 历史排查结论：直连 Krill 的 stream/non-stream 都曾返回 200；经当时 Sub2API 的真实流式路径会 502。后台“测试账号连接”是非流式直连，对这类账号可能假阳性。该结论只用于解释历史下架原因，不证明当前上游实现仍相同。
 
-### GPT-Image（历史状态，当前未启用）
+### GPT-Image（当前未启用）
 
-GPT-Image 按调用计费，历史真实探针成本约 `$0.15/call`；仅用 `/v1/models` 又拿不到实质服务信号，因此 2026-05-23 已移除。恢复前必须重新核算成本并获得授权。
+GPT-Image 按调用计费，历史真实生成探针成本约 `$0.15/call`；group 5 monitor 已按维护者授权下架，保留的 `img-models-list.json`、key 或环境变量不代表启用。恢复前必须重新核算成本并获得授权。
 
 ## 8. Sakrylle 定制与上游同步
 
@@ -244,7 +250,7 @@ GPT-Image 按调用计费，历史真实探针成本约 `$0.15/call`；仅用 `/
 - Logo：樱花 SVG 替代上游 RP 文字 logo。
 - 语言切换：使用文字代码（ZH/EN/RU/JA），无国旗图标。
 - 删除页面/组件：`ContactPage`、`OnboardingPage`、`ChangeRequestPage`、`Footer.tsx`、`useOnboarding`、`useChangeRequest`、`utils/share.ts`。rebase 后它们可能回来，需要重新删除。
-- 状态视图：桌面端默认使用卡片视图，移动端强制表格；隐藏 Model/Price/Listed-days 列；`MOBILE_ROW_HEIGHT=200`；`HIDDEN_ANNOTATION_IDS` 过滤 `frequency`、`public_service`、`key_type`、`sponsor_*`。
+- 状态视图：桌面端和移动端默认使用列表视图，仍可手动切换卡片；隐藏 Model/Price/Listed-days 列；`MOBILE_ROW_HEIGHT=200`；`HIDDEN_ANNOTATION_IDS` 过滤 `frequency`、`public_service`、`key_type`、`sponsor_*`。
 - Channel 解析：`parseChannelType` 对无前缀 channel 返回 `null`，上游返回 `'unknown'`。
 - 主题逻辑：`useTheme.ts` 监听浏览器深浅色偏好；截图模式仍强制 `default-dark`。
 

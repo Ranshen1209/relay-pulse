@@ -39,10 +39,10 @@ afterEach(() => {
 });
 
 describe('useUrlState view mode', () => {
-  it('defaults to the card grid', async () => {
+  it('defaults to the table list', async () => {
     await renderAt('/');
 
-    expect(container.querySelector('[data-testid="url-state"]')?.getAttribute('data-view-mode')).toBe('grid');
+    expect(container.querySelector('[data-testid="url-state"]')?.getAttribute('data-view-mode')).toBe('table');
   });
 
   it('respects an explicit table view in the URL', async () => {
