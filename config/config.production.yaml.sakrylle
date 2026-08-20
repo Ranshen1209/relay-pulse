@@ -1,12 +1,14 @@
 # Sakrylle Status - Production config
 #
-# Probes all active token-billed Sakrylle groups except Claude-Max (16) and
-# Claude-Max-C (17). API keys are injected via env vars and each key is scoped
-# to exactly one Sub2API group.
+# Probes the selected active token-billed Sakrylle groups. GPT-Image (5),
+# Claude-Max (16), Claude-Max-C (17), and GPT-Team (36) are intentionally not
+# monitored. API keys are injected via env vars and each key is scoped to
+# exactly one Sub2API group.
 #
 # GPT probes use gpt-5.6-terra, which was verified through the gateway with
 # successful responses and usage records. GPT-Image is intentionally not
-# monitored; its existing key remains outside this configuration.
+# monitored; its existing key remains outside this configuration. GPT-Team's
+# existing key is also retained outside this configuration.
 #
 interval: 3m
 slow_latency: 8s
@@ -216,24 +218,3 @@ monitors:
     retry: 3
     timeout: 30s
     env_var_name: MONITOR_SAKRYLLE_GPT_PLUS_API_KEY
-
-  # Group 36 - GPT-Team @ 0.15x
-  - provider: sakrylle
-    provider_name: Sakrylle
-    provider_url: https://ai1.sakrylle.com
-    service: cx
-    service_name: GPT
-    category: commercial
-    sponsor: Sakrylle
-    sponsor_url: https://ai1.sakrylle.com
-    sponsor_level: core
-    key_type: official
-    channel: gpt-team
-    channel_name: GPT-Team
-    model: GPT 5.6 Terra
-    request_model: gpt-5.6-terra
-    base_url: https://api.sakrylle.com
-    template: cx-gpt-mini-chat
-    retry: 3
-    timeout: 30s
-    env_var_name: MONITOR_SAKRYLLE_GPT_TEAM_API_KEY

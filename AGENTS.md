@@ -158,9 +158,9 @@ config.yaml 是小体积配置，可在确认备份后通过 scp 更新并观察
 
 `ci-release.yml` 中的 `VITE_NOTIFIER_API_URL` 和 notifier 截图配置的代码默认值仍指向上游历史域名，均未从当前生产现场验证。`notifier/README.md` 已改为显式占位符；不要把代码 fallback 当成生产入口，也不要据此写入新的服务器地址。
 
-## 6. 当前生产探针（2026-08-16 核验快照）
+## 6. 当前生产探针（2026-08-20 核验快照）
 
-以下事实由 2026-08-16 通过 `ssh-sakrylle`、生产 `config.yaml`、Sub2API PostgreSQL、`/v1/models`、真实请求和最近日志核对得到。生产实际加载 11 个 monitor，provider 均为 `sakrylle`；按维护者授权，GPT-Image（group 5）、Claude-Max（group 16）和 Claude-Max-C（group 17）明确排除。
+以下事实由 2026-08-20 通过 `ssh-sakrylle`、生产 `config.yaml`、Sub2API PostgreSQL、`/v1/models`、真实请求和最近日志核对得到。生产实际加载 10 个 monitor，provider 均为 `sakrylle`；按维护者授权，GPT-Image（group 5）、Claude-Max（group 16）、Claude-Max-C（group 17）和 GPT-Team（group 36）明确排除。
 
 | Channel key | Service | Template / request model | Sub2API group / rate | 最近核验 |
 |---|---|---|---|---|
@@ -174,13 +174,12 @@ config.yaml 是小体积配置，可在确认备份后通过 scp 更新并观察
 | deepseek-plan-anthropic | dx | dx-flash-openai-chat / deepseek-v4-flash | 33 / 0.60 | HTTP 200 |
 | deepseek-plan-openai | dx | dx-flash-openai-chat / deepseek-v4-flash | 34 / 0.60 | HTTP 200 |
 | gpt-plus | cx | cx-gpt-mini-chat / gpt-5.6-terra | 35 / 0.20 | HTTP 200，真实 usage 已确认 |
-| gpt-team | cx | cx-gpt-mini-chat / gpt-5.6-terra | 36 / 0.15 | HTTP 200，真实 usage 已确认 |
 
 共同事实：生产配置声明 `interval: 3m`、`retry: 3`、`timeout: 30s`，API base URL 为 `https://api.sakrylle.com`，请求路径主要为 OpenAI-compatible `POST /v1/chat/completions`。`retry: 3` 表示最多 4 次尝试，`timeout: 30s` 是整轮尝试共享的总预算，超时不会重试。默认退避为 `retry_base_delay=200ms`、`retry_max_delay=2s`、`retry_jitter=0.2`。
 
-11 个 monitor 均使用绑定到单一 group 的独立 active key，环境变量名分别在生产配置的 `env_var_name` 中声明；只记录绑定状态，不记录 key 值。GPT-Image key 及服务器 `.env` 中的历史 Claude/Grok/Agnes/旧 Deepseek 行不代表启用 monitor，清理或撤销前需单独授权。
+10 个 monitor 均使用绑定到单一 group 的独立 active key，环境变量名分别在生产配置的 `env_var_name` 中声明；只记录绑定状态，不记录 key 值。GPT-Image、GPT-Team key 及服务器 `.env` 中的历史 Claude/Grok/Agnes/旧 Deepseek 行不代表启用 monitor，清理或撤销前需单独授权。
 
-2026-08-16 已在服务器本地备份配置、`.env` 和 SQLite，然后清空 `probe_history`、`service_states`、`status_events`、`channel_states`、`monitor_overrides`；完整性检查为 `ok`。清理后产生的记录属于新周期，不应与旧历史混淆。四个 GPT monitor 均由 monitor 级 `request_model: gpt-5.6-terra` 显式覆盖模板默认值；未经新的真实请求和 usage 核验，不要移除该覆盖或改用其他模型。
+2026-08-20 已在服务器本地备份配置和 SQLite，然后清空 `probe_history`、`service_states`、`status_events`、`channel_states`、`monitor_overrides`；完整性检查为 `ok`。清理后产生的记录属于新周期，不应与旧历史混淆。三个 GPT monitor 均由 monitor 级 `request_model: gpt-5.6-terra` 显式覆盖模板默认值；未经新的真实请求和 usage 核验，不要移除该覆盖或改用其他模型。
 
 ### 历史探针记录
 
@@ -197,17 +196,18 @@ config.yaml 是小体积配置，可在确认备份后通过 scp 更新并观察
 - 2026-07-24（二，历史状态）：下架 `grok`，清空 `monitor.db` 全部历史（不备份）。探针数 4 -> 3。`.env` 里的 `MONITOR_SAKRYLLE_GROK_API_KEY` 成为孤立行。
 - 2026-07-24（三，历史状态）：卡片主标题由服务商名改为通道展示名；`deepseek-official` 的通道展示名由 DeepSeek-Anthropic 改为 DeepSeek。
 - 2026-07-24（四，历史状态）：服务商展示名改为 Sakrylle，公开目标网址由 `sub.sakrylle.com` 改为 `ai1.sakrylle.com`；卡片标题仍显示通道名，外链确认弹窗显示服务商名。
-- 2026-08-16（当前状态）：按维护者授权保留 11 个 monitor，排除 GPT-Image（5）、Claude-Max（16）和 Claude-Max-C（17）；四个 GPT 通道使用 gpt-5.6-terra，`deepseek-official` 展示名为 DeepSeek-Anthropic，状态页默认使用列表视图，并清空全部历史/状态表。
+- 2026-08-16（历史状态）：按维护者授权保留 11 个 monitor，排除 GPT-Image（5）、Claude-Max（16）和 Claude-Max-C（17）；四个 GPT 通道使用 gpt-5.6-terra，`deepseek-official` 展示名为 DeepSeek-Anthropic，状态页默认使用列表视图，并清空全部历史/状态表。
+- 2026-08-20（当前状态）：下架 GPT-Team（36），生产保留 10 个 monitor；其 key 与 `.env` 行保留为孤立配置，并再次清空全部历史/状态表。
 
 ## 7. 高风险探针与历史模板
 
-Claude-AWSQ、Claude-Kiro、Grok 和新增 DeepSeek/GPT group 当前已在生产 monitor 列表。GPT-Image（5）、Claude-Max（16）、Claude-Max-C（17）、Agnes、Claude-Code-AWSQ（12）和旧 Deepseek-Special 当前未启用。保留模板、key 或前端图标不等于可以重新启用；重新启用必须先核对 group、key、`/v1/models`、真实请求和 usage log。
+Claude-AWSQ、Claude-Kiro、Grok 和新增 DeepSeek/GPT group 当前已在生产 monitor 列表。GPT-Image（5）、Claude-Max（16）、Claude-Max-C（17）、GPT-Team（36）、Agnes、Claude-Code-AWSQ（12）和旧 Deepseek-Special 当前未启用。保留模板、key 或前端图标不等于可以重新启用；重新启用必须先核对 group、key、`/v1/models`、真实请求和 usage log。
 
 历史 `gk` / `ag` service code 与前端 Grok/Agnes 图标保留用于兼容定制分支；无对应 monitor 时不会渲染，不应把保留代码误认成已启用探针。
 
 ### GPT（当前已启用）
 
-GPT-Pro、GPT-Pro-Special、GPT-Plus 和 GPT-Team 均由 monitor 显式请求 `gpt-5.6-terra`，并已完成真实请求与 usage 核验。`cx-gpt-mini-chat` 模板的默认 `gpt-5.4-mini` 仍保留给其他历史调用；不要在没有对应 group 验证的情况下全局修改模板。
+GPT-Pro、GPT-Pro-Special 和 GPT-Plus 均由 monitor 显式请求 `gpt-5.6-terra`，并已完成真实请求与 usage 核验。GPT-Team 已下架，其 key 和环境变量不代表启用。`cx-gpt-mini-chat` 模板的默认 `gpt-5.4-mini` 仍保留给其他历史调用；不要在没有对应 group 验证的情况下全局修改模板。
 
 ### claude-kiro-special（历史状态，当前未启用）
 
