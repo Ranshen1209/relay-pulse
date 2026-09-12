@@ -322,6 +322,13 @@ describe('degradedLatencyToColor', () => {
 });
 
 describe('heatmapBlockToStyle', () => {
+  it('缓慢按满分计入可用率时，仍显示慢响应颜色', () => {
+    const point = makePoint({ availability: 100, latency: 16000, slowLatencyMs: 15000, status: 'DEGRADED' });
+    expect(heatmapBlockToStyle(point, true)).toEqual({
+      backgroundColor: degradedLatencyToColor(16000, 15000),
+    });
+  });
+
   it('uses availability coloring when useLatencyGradient is false', () => {
     const point = makePoint({ availability: 100, latency: 500, slowLatencyMs: 1000 });
     const style = heatmapBlockToStyle(point, false);

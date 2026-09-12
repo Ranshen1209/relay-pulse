@@ -1,17 +1,13 @@
-# Sakrylle Status - Production config
-#
-# Probes the selected active token-billed Sakrylle groups. GPT-Image (5),
-# Claude-Max (16), Claude-Max-C (17), and GPT-Team (36) are intentionally not
-# monitored. API keys are injected via env vars and each key is scoped to
-# exactly one Sub2API group.
-#
-# GPT probes use gpt-5.6-terra, which was verified through the gateway with
-# successful responses and usage records. GPT-Image is intentionally not
-# monitored; its existing key remains outside this configuration. GPT-Team's
-# existing key is also retained outside this configuration.
+# Sakrylle Status 生产配置：每个监测 key 只绑定一个 Sub2API group。
+# 可用率按重试后的探测成功率统计：正常/缓慢均计 1，失败计 0；
+# 前端按实际探测次数汇总，完全无数据的时间块不参与计算。
+# 响应与答案校验通过后，耗时 <= 15s 为正常，> 15s 为缓慢。
+# 每轮最多 4 次尝试，共享 30s 超时预算，只保存最终结果。
+# GPT-Image、GPT-Team、Claude 和 DeepSeek 通道保持下架。
 #
 interval: 3m
-slow_latency: 8s
+slow_latency: 15s
+degraded_weight: 1.0
 
 public_base_url: https://status.sakrylle.com
 
@@ -21,26 +17,7 @@ storage:
     path: /data/monitor.db
 
 monitors:
-  # Group 2 - Claude-AWSQ @ 0.30x
-  - provider: sakrylle
-    provider_name: Sakrylle
-    provider_url: https://ai1.sakrylle.com
-    service: cc
-    service_name: Claude
-    category: commercial
-    sponsor: Sakrylle
-    sponsor_url: https://ai1.sakrylle.com
-    sponsor_level: core
-    key_type: official
-    channel: claude-awsq
-    channel_name: Claude-AWSQ
-    base_url: https://api.sakrylle.com
-    template: cc-haiku-openai-chat
-    retry: 3
-    timeout: 30s
-    env_var_name: MONITOR_SAKRYLLE_CLAUDE_AWSQ_API_KEY
-
-  # Group 3 - GPT-Pro-Special @ 0.30x
+  # Group 3 - GPT-Pro-Special @ 0.28x
   - provider: sakrylle
     provider_name: Sakrylle
     provider_url: https://ai1.sakrylle.com
@@ -53,34 +30,16 @@ monitors:
     key_type: official
     channel: gpt-pro-special
     channel_name: GPT-Pro-Special
-    model: GPT 5.6 Terra
-    request_model: gpt-5.6-terra
+    model: GPT 5.6 Sol
+    request_model: gpt-5.6-sol
     base_url: https://api.sakrylle.com
     template: cx-gpt-mini-chat
+    slow_latency: 15s
     retry: 3
     timeout: 30s
     env_var_name: MONITOR_SAKRYLLE_GPT_PRO_SPECIAL_API_KEY
 
-  # Group 9 - DeepSeek-Anthropic @ 1.00x
-  - provider: sakrylle
-    provider_name: Sakrylle
-    provider_url: https://ai1.sakrylle.com
-    service: dx
-    service_name: DeepSeek
-    category: commercial
-    sponsor: Sakrylle
-    sponsor_url: https://ai1.sakrylle.com
-    sponsor_level: core
-    key_type: official
-    channel: deepseek-official
-    channel_name: DeepSeek-Anthropic
-    base_url: https://api.sakrylle.com
-    template: dx-flash-openai-chat
-    retry: 3
-    timeout: 30s
-    env_var_name: MONITOR_SAKRYLLE_DEEPSEEK_OFFICIAL_API_KEY
-
-  # Group 14 - GPT-Pro @ 0.35x
+  # Group 14 - GPT-Pro @ 0.40x
   - provider: sakrylle
     provider_name: Sakrylle
     provider_url: https://ai1.sakrylle.com
@@ -93,32 +52,36 @@ monitors:
     key_type: official
     channel: gpt-pro
     channel_name: GPT-Pro
-    model: GPT 5.6 Terra
-    request_model: gpt-5.6-terra
+    model: GPT 5.6 Sol
+    request_model: gpt-5.6-sol
     base_url: https://api.sakrylle.com
     template: cx-gpt-mini-chat
+    slow_latency: 15s
     retry: 3
     timeout: 30s
     env_var_name: MONITOR_SAKRYLLE_GPT_PRO_API_KEY
 
-  # Group 15 - Claude-Kiro @ 0.30x
+  # Group 35 - GPT-Plus @ 0.18x
   - provider: sakrylle
     provider_name: Sakrylle
     provider_url: https://ai1.sakrylle.com
-    service: cc
-    service_name: Claude
+    service: cx
+    service_name: GPT
     category: commercial
     sponsor: Sakrylle
     sponsor_url: https://ai1.sakrylle.com
     sponsor_level: core
     key_type: official
-    channel: claude-kiro
-    channel_name: Claude-Kiro
+    channel: gpt-plus
+    channel_name: GPT-Plus
+    model: GPT 5.6 Sol
+    request_model: gpt-5.6-sol
     base_url: https://api.sakrylle.com
-    template: cc-haiku-openai-chat
+    template: cx-gpt-mini-chat
+    slow_latency: 15s
     retry: 3
     timeout: 30s
-    env_var_name: MONITOR_SAKRYLLE_CLAUDE_KIRO_API_KEY
+    env_var_name: MONITOR_SAKRYLLE_GPT_PLUS_API_KEY
 
   # Group 22 - Grok-API @ 0.10x
   - provider: sakrylle
@@ -133,88 +96,11 @@ monitors:
     key_type: official
     channel: grok
     channel_name: Grok-API
+    model: Grok 4.6
+    request_model: grok-4.6
     base_url: https://api.sakrylle.com
-    template: gk-grok-openai-chat
+    template: gk-grok-arith
+    slow_latency: 15s
     retry: 3
     timeout: 30s
     env_var_name: MONITOR_SAKRYLLE_GROK_API_KEY
-
-  # Group 31 - Deepseek-OpenAI @ 1.00x
-  - provider: sakrylle
-    provider_name: Sakrylle
-    provider_url: https://ai1.sakrylle.com
-    service: dx
-    service_name: DeepSeek
-    category: commercial
-    sponsor: Sakrylle
-    sponsor_url: https://ai1.sakrylle.com
-    sponsor_level: core
-    key_type: official
-    channel: deepseek-openai
-    channel_name: DeepSeek-OpenAI
-    base_url: https://api.sakrylle.com
-    # This route spends the first 8 tokens on reasoning; give it 32 so the
-    # semantic answer is present instead of treating a valid 200 as a miss.
-    template: dx-flash-openai-chat-extended
-    retry: 3
-    timeout: 30s
-    env_var_name: MONITOR_SAKRYLLE_DEEPSEEK_OPENAI_API_KEY
-
-  # Group 33 - DeepSeek-Plan-Anthropic @ 0.60x
-  - provider: sakrylle
-    provider_name: Sakrylle
-    provider_url: https://ai1.sakrylle.com
-    service: dx
-    service_name: DeepSeek
-    category: commercial
-    sponsor: Sakrylle
-    sponsor_url: https://ai1.sakrylle.com
-    sponsor_level: core
-    key_type: official
-    channel: deepseek-plan-anthropic
-    channel_name: DeepSeek-Plan-Anthropic
-    base_url: https://api.sakrylle.com
-    template: dx-flash-openai-chat
-    retry: 3
-    timeout: 30s
-    env_var_name: MONITOR_SAKRYLLE_DEEPSEEK_PLAN_ANTHROPIC_API_KEY
-
-  # Group 34 - DeepSeek-Plan-OpenAI @ 0.60x
-  - provider: sakrylle
-    provider_name: Sakrylle
-    provider_url: https://ai1.sakrylle.com
-    service: dx
-    service_name: DeepSeek
-    category: commercial
-    sponsor: Sakrylle
-    sponsor_url: https://ai1.sakrylle.com
-    sponsor_level: core
-    key_type: official
-    channel: deepseek-plan-openai
-    channel_name: DeepSeek-Plan-OpenAI
-    base_url: https://api.sakrylle.com
-    template: dx-flash-openai-chat
-    retry: 3
-    timeout: 30s
-    env_var_name: MONITOR_SAKRYLLE_DEEPSEEK_PLAN_OPENAI_API_KEY
-
-  # Group 35 - GPT-Plus @ 0.20x
-  - provider: sakrylle
-    provider_name: Sakrylle
-    provider_url: https://ai1.sakrylle.com
-    service: cx
-    service_name: GPT
-    category: commercial
-    sponsor: Sakrylle
-    sponsor_url: https://ai1.sakrylle.com
-    sponsor_level: core
-    key_type: official
-    channel: gpt-plus
-    channel_name: GPT-Plus
-    model: GPT 5.6 Terra
-    request_model: gpt-5.6-terra
-    base_url: https://api.sakrylle.com
-    template: cx-gpt-mini-chat
-    retry: 3
-    timeout: 30s
-    env_var_name: MONITOR_SAKRYLLE_GPT_PLUS_API_KEY

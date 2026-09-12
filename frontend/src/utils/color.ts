@@ -334,12 +334,13 @@ export function heatmapBlockToStyle(point: HeatmapPoint, useLatencyGradient = fa
   const slowMs = point.slowLatencyMs ?? 0;
   const hasValidLatency = point.latency > 0 && slowMs > 0;
 
-  if (point.availability === 100 && hasValidLatency) {
-    return { backgroundColor: greenLatencyToColor(point.latency, slowMs) };
+  // 慢响应的计分权重可配置，颜色仍由探测状态决定。
+  if (point.status === 'DEGRADED' && point.availability >= 0 && hasValidLatency) {
+    return { backgroundColor: degradedLatencyToColor(point.latency, slowMs) };
   }
 
-  if (point.availability === 70 && hasValidLatency) {
-    return { backgroundColor: degradedLatencyToColor(point.latency, slowMs) };
+  if (point.availability === 100 && point.status === 'AVAILABLE' && hasValidLatency) {
+    return { backgroundColor: greenLatencyToColor(point.latency, slowMs) };
   }
 
   return availabilityToStyle(point.availability);

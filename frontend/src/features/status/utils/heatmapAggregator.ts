@@ -1,4 +1,5 @@
 import type { ProcessedMonitorData } from '../../../types';
+import { calculateWeightedAvailability } from '../../../utils/availability';
 import { BREAKPOINTS, addMediaQueryListener } from '../../../utils/mediaQuery';
 
 type HistoryPoint = ProcessedMonitorData['history'][number];
@@ -135,9 +136,7 @@ function aggregateGroup(group: HistoryPoint[]): HistoryPoint {
     .map(p => p.availability)
     .filter(a => a >= 0); // 过滤掉无数据的点 (-1)
 
-  const avgAvailability = availabilities.length > 0
-    ? availabilities.reduce((sum, a) => sum + a, 0) / availabilities.length
-    : -1;
+  const avgAvailability = calculateWeightedAvailability(group);
 
   const minAvailability = availabilities.length > 0
     ? Math.min(...availabilities)

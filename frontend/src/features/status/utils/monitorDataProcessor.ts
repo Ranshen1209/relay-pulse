@@ -8,6 +8,7 @@ import type {
   StatusCounts,
 } from '../../../types';
 import { STATUS_MAP } from '../../../types';
+import { calculateWeightedAvailability } from '../../../utils/availability';
 
 // ─── 字符串规范化 ───────────────────────────────────────────
 
@@ -271,13 +272,9 @@ function buildCompositeTimelineFromLayers(
 
 // ─── 可用率 ─────────────────────────────────────────────────
 
-/** 计算可用率：仅统计有数据的时间块（availability >= 0） */
-export function calculateUptime(points: Array<{ availability: number }>): number {
-  const validPoints = points.filter((point) => point.availability >= 0);
-  if (validPoints.length === 0) return -1;
-  return parseFloat((
-    validPoints.reduce((acc, point) => acc + point.availability, 0) / validPoints.length
-  ).toFixed(2));
+/** 按实际探测次数汇总可用率，避免不完整小时/天与完整时段等权。 */
+export function calculateUptime(points: Parameters<typeof calculateWeightedAvailability>[0]): number {
+  return Number(calculateWeightedAvailability(points).toFixed(2));
 }
 
 // ─── history 构建 ───────────────────────────────────────────

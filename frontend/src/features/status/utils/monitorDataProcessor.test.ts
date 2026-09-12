@@ -112,6 +112,33 @@ describe('monitorDataProcessor', () => {
   });
 
   describe('calculateUptime', () => {
+    it('按探测次数汇总，完整小时的 20 次成功与新小时的 1 次失败得到 95.24%', () => {
+      expect(calculateUptime([
+        { availability: 100, statusCounts: counts({ available: 20 }) },
+        { availability: 0, statusCounts: counts({ unavailable: 1 }) },
+        { availability: -1, statusCounts: ZERO_COUNTS },
+      ])).toBe(95.24);
+    });
+
+    it('不同时间分桶不改变同一批探测的总可用率', () => {
+      const raw = [
+        ...Array.from({ length: 18 }, () => ({ availability: 100, statusCounts: counts({ available: 1 }) })),
+        ...Array.from({ length: 2 }, () => ({ availability: 70, statusCounts: counts({ degraded: 1 }) })),
+        { availability: 0, statusCounts: counts({ unavailable: 1 }) },
+      ];
+      expect(calculateUptime([
+        { availability: 97, statusCounts: counts({ available: 18, degraded: 2 }) },
+        { availability: 0, statusCounts: counts({ unavailable: 1 }) },
+      ])).toBe(calculateUptime(raw));
+    });
+
+    it('缓慢按满分计入时仍保留真正失败的扣分', () => {
+      expect(calculateUptime([
+        { availability: 100, statusCounts: counts({ degraded: 9 }) },
+        { availability: 0, statusCounts: counts({ unavailable: 1 }) },
+      ])).toBe(90);
+    });
+
     it('全部有效点返回平均值（两位小数）', () => {
       expect(calculateUptime([
         { availability: 100 },
