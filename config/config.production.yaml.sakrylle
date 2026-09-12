@@ -83,7 +83,7 @@ monitors:
     timeout: 30s
     env_var_name: MONITOR_SAKRYLLE_GPT_PLUS_API_KEY
 
-  # Group 22 - Grok-API @ 0.10x
+  # Group 41 - Grok-Build @ 0.40x
   - provider: sakrylle
     provider_name: Sakrylle
     provider_url: https://ai1.sakrylle.com
@@ -94,8 +94,8 @@ monitors:
     sponsor_url: https://ai1.sakrylle.com
     sponsor_level: core
     key_type: official
-    channel: grok
-    channel_name: Grok-API
+    channel: grok-build
+    channel_name: Grok-Build
     model: Grok 4.6
     request_model: grok-4.6
     base_url: https://api.sakrylle.com
@@ -103,4 +103,4 @@ monitors:
     slow_latency: 15s
     retry: 3
     timeout: 30s
-    env_var_name: MONITOR_SAKRYLLE_GROK_API_KEY
+    env_var_name: MONITOR_SAKRYLLE_GROK_BUILD_API_KEY
