@@ -30,8 +30,8 @@ monitors:
     key_type: official
     channel: gpt-pro-special
     channel_name: GPT-Pro-Special
-    model: GPT 5.6 Sol
-    request_model: gpt-5.6-sol
+    model: GPT 5.5
+    request_model: gpt-5.5
     base_url: https://api.sakrylle.com
     template: cx-gpt-mini-chat
     slow_latency: 15s
@@ -52,8 +52,8 @@ monitors:
     key_type: official
     channel: gpt-pro
     channel_name: GPT-Pro
-    model: GPT 5.6 Sol
-    request_model: gpt-5.6-sol
+    model: GPT 5.5
+    request_model: gpt-5.5
     base_url: https://api.sakrylle.com
     template: cx-gpt-mini-chat
     slow_latency: 15s
@@ -74,8 +74,8 @@ monitors:
     key_type: official
     channel: gpt-plus
     channel_name: GPT-Plus
-    model: GPT 5.6 Sol
-    request_model: gpt-5.6-sol
+    model: GPT 5.5
+    request_model: gpt-5.5
     base_url: https://api.sakrylle.com
     template: cx-gpt-mini-chat
     slow_latency: 15s
